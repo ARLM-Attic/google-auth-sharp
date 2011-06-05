@@ -5,6 +5,10 @@ namespace System
 {
     public static class Base32Encoder
     {
+        //THIS CODE TAKEN AND THEN AUGMENTED FROM:
+        //http://www.codeproject.com/KB/recipes/Base32Encoding.aspx
+        //My modifcations were to make this a static class that takes no constructors or customizations.
+
         private const string ENCODING_TABLE = "abcdefghijklmnopqrstuvwxyz234567";
         private const char PADDING = '=';
 

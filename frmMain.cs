@@ -275,6 +275,11 @@ namespace GoogleAuthClone
                     butDel.Visible = false;
                     butEdit.Visible = false;
                 }
+                else
+                {
+                    butDel.Visible = true;
+                    butEdit.Visible = true;
+                }
                 tmrGetCodes.Enabled = true;
             }
         }

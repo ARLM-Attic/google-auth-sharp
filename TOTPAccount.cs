@@ -118,6 +118,9 @@ namespace GoogleAuthClone
             return this.Name;
         }
 
+        //example URI for ToString and FromString
+        //otpauth://totp/some.email.address@gmail.com?secret=cbtu2gs6uesagw3p&digits=6&period=30
+
         public string ToString(byte[] key)
         {
             System.Text.UTF8Encoding myEncoder = new UTF8Encoding();
