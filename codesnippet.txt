@@ -1,0 +1,7 @@
+ASCIIEncoding myEncoder = new ASCIIEncoding();
+            UInt64[] state = SkeinLib.SkeinCore.Initialize(8, 512);
+            SkeinLib.SkeinCore.ProcessPersonalization(ref state, myEncoder.GetBytes("GOOGLEAUTHCLONE SPARKS 2011-MARCH-09"));
+            SkeinLib.SkeinCore.ProcessKeyId(ref state, myEncoder.GetBytes(Name));
+            SkeinLib.SkeinCore.ProcessMessage(ref state, key);
+            byte[] localKey = SkeinLib.SkeinCore.ProcessStandardOutput(ref state, 512);
+            byte[] localResult = SkeinLib.ThreeFish.ThreeFish512Bytes(secret, localKey, new byte[] { 0xFF, 0xEE, 0xDD });
