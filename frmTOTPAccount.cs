@@ -36,7 +36,7 @@ namespace GoogleAuthClone
             {
                 txtName.Text = theAccount.Name;
                 txtPeriod.Text = theAccount.Period.ToString();
-                txtSecret.Text = theAccount.GetDecryptedSecret(theLocalPass.UseRaw(), true);
+                txtSecret.Text = theAccount.EncodedSecret;
                 switch (theAccount.Algorithm)
                 {
                     case TOTPAccount.TOTPAlgorithm.SHA1: cbAlgorithm.SelectedIndex = 0; break;
@@ -108,7 +108,7 @@ namespace GoogleAuthClone
             }
 
             theAccount.Name = this.txtName.Text;
-            theAccount.SetEncryptedSecret(tempSecret, theLocalPass.UseRaw());
+            theAccount.SetEncodedSecret(tempSecret);
             switch (cbAlgorithm.Text)
             {
                 case "SHA1": theAccount.Algorithm = TOTPAccount.TOTPAlgorithm.SHA1; break;

@@ -59,58 +59,30 @@ namespace GoogleAuthClone
             }
         }
   
-        private string _encryptedSecret = string.Empty;
-        public string EncryptedSecret { get { return _encryptedSecret; } }
+        private string _encodedSecret = string.Empty;
+        public string EncodedSecret { get { return _encodedSecret; } }
 
-        public void SetEncryptedSecret(string base32Secret, byte[] key)
+        public void SetEncodedSecret(string base32Secret)
         {
-            this.SetEncryptedSecret(Base32Encoder.FromBase32String(base32Secret), key);
+            _encodedSecret = base32Secret;
         }
 
-        public void SetEncryptedSecret(byte[] secret, byte[] key)
+        public void SetEncodedSecret(byte[] rawSecret)
         {
-            if (key == null || key.Length != 64)
-                throw new ArgumentException("Key must be length 64 bytes (512 bits) and not null","key");
-            if (secret == null || secret.Length < 10)
-                throw new ArgumentException("Secret must be length 10 bytes (80 bits) or greater and not null", "secret");
-            // only required if using name as part of encryption
-            //if (string.IsNullOrEmpty(Name))
-            //    throw new System.InvalidOperationException("This account must be named first before setting its secret");
-            
-            _encryptedSecret = System.Convert.ToBase64String( 
-                SkeinLib.ThreeFish.ThreeFish512Bytes(
-                secret, 
-                key, 
-                new byte[] { 0xFF, 0xEE, 0xDD })
-            );
+            _encodedSecret = Base32Encoder.ToBase32String(rawSecret);
         }
 
-        public byte[] GetDecryptedSecret(byte[] key)
+        public byte[] GetSecret()
         {
-            if (string.IsNullOrWhiteSpace(EncryptedSecret))
+            if (string.IsNullOrWhiteSpace(EncodedSecret))
                 return null;
-            if (key == null || key.Length != 64)
-                throw new ArgumentException("Key must be length 64 bytes (512 bits) and not null", "key");
-            return SkeinLib.ThreeFish.InvThreeFish512Bytes(
-                System.Convert.FromBase64String(EncryptedSecret), 
-                key, 
-                new byte[] { 0xFF, 0xEE, 0xDD });
-        }
-
-        public string GetDecryptedSecret(byte[] key, bool asBase32OrBase64)
-        {
-            if (string.IsNullOrWhiteSpace(EncryptedSecret))
-                return string.Empty;
-            if (asBase32OrBase64)
-                return Base32Encoder.ToBase32String(this.GetDecryptedSecret(key));
-            else
-                return Convert.ToBase64String(this.GetDecryptedSecret(key));
+            return Base32Encoder.FromBase32String(EncodedSecret);
         }
 
         public void Clear()
         {
             _name = string.Empty;
-            _encryptedSecret = string.Empty;
+            _encodedSecret = string.Empty;
         }
 
         public override string ToString()
@@ -128,7 +100,7 @@ namespace GoogleAuthClone
 
             sb.Append(URIHeader); // REQUIRED
             sb.Append(Name); // REQUIRED
-            sb.Append("?secret=" + GetDecryptedSecret(key, true)); // REQUIRED
+            sb.Append("?secret=" + EncodedSecret); // REQUIRED
             if (Algorithm != TOTPAlgorithm.SHA1)
                 sb.Append("&algorithm=" + Algorithm.ToString()); //OPTIONAL
             if (Digits != 6)
@@ -180,11 +152,11 @@ namespace GoogleAuthClone
                 if (string.IsNullOrWhiteSpace(tempAcc.Name))
                     return null;
                 
-                tempAcc.SetEncryptedSecret(tempSecret, key);
+                tempAcc.SetEncodedSecret(tempSecret);
 
                 return tempAcc;
             }
-            catch
+            catch (Exception ex)
             {
                 return null;
             }
@@ -202,10 +174,10 @@ namespace GoogleAuthClone
             SSC.HMAC myAlg = null;
             switch (Algorithm)
             {
-                case TOTPAlgorithm.SHA1: myAlg = new SSC.HMACSHA1(this.GetDecryptedSecret(key)); break;
-                case TOTPAlgorithm.SHA256: myAlg = new SSC.HMACSHA256(this.GetDecryptedSecret(key)); break;
-                case TOTPAlgorithm.SHA512: myAlg = new SSC.HMACSHA512(this.GetDecryptedSecret(key)); break;
-                case TOTPAlgorithm.MD5: myAlg = new SSC.HMACMD5(this.GetDecryptedSecret(key)); break;
+                case TOTPAlgorithm.SHA1: myAlg = new SSC.HMACSHA1(this.GetSecret()); break;
+                case TOTPAlgorithm.SHA256: myAlg = new SSC.HMACSHA256(this.GetSecret()); break;
+                case TOTPAlgorithm.SHA512: myAlg = new SSC.HMACSHA512(this.GetSecret()); break;
+                case TOTPAlgorithm.MD5: myAlg = new SSC.HMACMD5(this.GetSecret()); break;
             }        
             UInt64 theInterval = GetTimeCode(when, Period);
             byte[] theIntervalsBytes = BitConverter.GetBytes(theInterval);
@@ -250,5 +222,13 @@ namespace GoogleAuthClone
             return epoch / (UInt64)(interval);
         }
 
+        public Single PercentIntervalElapsed(DateTime theDateTime)
+        {
+            long epoch = ((theDateTime.ToUniversalTime().Ticks - 621355968000000000) / 10000000);
+            long rem;
+            Math.DivRem(epoch, this.Period, out rem);
+            Single result = (Single)rem / (long)this.Period;
+            return result;
+        }
     }
 }

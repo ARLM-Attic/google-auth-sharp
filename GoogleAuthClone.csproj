@@ -29,7 +29,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -56,7 +56,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <CodeAnalysisLogFile>bin\Release\GoogleAuthClone.exe.CodeAnalysisLog.xml</CodeAnalysisLogFile>
     <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
     <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
@@ -71,12 +71,12 @@
   <PropertyGroup>
     <ApplicationIcon>gac1.ico</ApplicationIcon>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>GoogleAuthClone.Program</StartupObject>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="MessagingToolkit.QRCode">
       <HintPath>..\..\Program Files (x86)\MessagingToolkit\MessagingToolkit-QRCode\QRCode\MessagingToolkit.QRCode.dll</HintPath>
-    </Reference>
-    <Reference Include="SkeinLib">
-      <HintPath>..\Skein\SkeinLib\bin\Release\SkeinLib.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -124,6 +124,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="frmDisplayBarcode.resx">
       <DependentUpon>frmDisplayBarcode.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="frmGetBarcode.resx">
       <DependentUpon>frmGetBarcode.cs</DependentUpon>

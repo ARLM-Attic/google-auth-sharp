@@ -1,3 +1,0 @@
-"otpauth://totp/dustin.joseph.sparks@gmail.com?secret=xqdtchrze64e7hbf&digits=6&period=30"
-"otpauth://totp/holycrapcakes@gmail.com?secret=baoaefqim7dntl3d&digits=6&period=30"
-"otpauth://totp/gorman.truart@gmail.com?secret=cvtu5gs7uesvgw3p&digits=6&period=30"

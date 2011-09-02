@@ -11,6 +11,7 @@ namespace GoogleAuthClone
 {
     public partial class frmMain : Form
     {
+        private Single timeOutFullWidth = 0;
         private PassPhrase ppStore = new PassPhrase();
         private List<TOTPAccount> accounts = new List<TOTPAccount>();
         private bool exitImmediately = false;
@@ -42,9 +43,22 @@ namespace GoogleAuthClone
                             return ta.Name == lbAccounts.SelectedItem.ToString();
                         });
                     lblCode.Text = theSelected.ComputePIN(ppStore.UseRaw(), DateTime.Now);
+                    
+                    Single percent = theSelected.PercentIntervalElapsed(DateTime.Now);
+                    if (percent > 0.65 && percent < 0.8)
+                        pbTimeOut.BackColor = Color.Yellow;
+                    else if (percent >= .8)
+                        pbTimeOut.BackColor = Color.Red;
+                    else
+                        pbTimeOut.BackColor = Color.Blue;
+                    pbTimeOut.Width = (int)(timeOutFullWidth * percent);
+                    pbTimeOut.Visible = true;
                 }
                 else
+                {
                     lblCode.Text = "==========";
+                    pbTimeOut.Visible = false;
+                }
                 tmrGetCodes.Enabled = true;
             }
             return;
@@ -58,17 +72,16 @@ namespace GoogleAuthClone
             string buffer = Persistence.GetAccountBlob(out blobProblem);
             if (blobProblem != null)
             {
-                MessageBox.Show("NO SOUP FOR YOU!\r\n" + blobProblem.Message + blobProblem.StackTrace);
-                Application.Exit();
+                KickUser(blobProblem.ToString());
             }
-            if (buffer == null)
+            if (buffer == null || string.IsNullOrWhiteSpace(buffer))
             {
                 //there are no previously saved accounts, time to get at least one.
                 //first: the desired passphrase
                 if (!ppStore.Set(this))
                 {
-                    MessageBox.Show("NO SOUP FOR YOU!");
-                    Application.Exit();
+                    //KickUser(); 
+                    return;
                 }
 
                 //second: get at least one new account
@@ -79,8 +92,7 @@ namespace GoogleAuthClone
                     MessageBox.Show(problem.Message + problem.StackTrace);
                 if (ret == System.Windows.Forms.DialogResult.Cancel)
                 {
-                    MessageBox.Show("NO SOUP FOR YOU!");
-                    Application.Exit();
+                    KickUser();
                     return;
                 }
                 TOTPAccount theNewAcc = myNewAcc.Tag as TOTPAccount;
@@ -96,8 +108,7 @@ namespace GoogleAuthClone
                 // first: need passphrase from user
                 if (!ppStore.GetFromUser(this))
                 {
-                    MessageBox.Show("NO SOUP FOR YOU!");
-                    Application.Exit();
+                    KickUser();
                     return;
                 }
                 // second: test passphrase against material, and ask for passphrase if no go
@@ -113,8 +124,7 @@ namespace GoogleAuthClone
                         ppStore.Clear();
                         if (!ppStore.GetFromUser(this))
                         {
-                            MessageBox.Show("NO SOUP FOR YOU!");
-                            Application.Exit();
+                            KickUser();
                             return;
                         }
                         else
@@ -124,8 +134,7 @@ namespace GoogleAuthClone
                     }
                     else
                     {
-                        MessageBox.Show("NO SOUP FOR YOU!");
-                        Application.Exit();
+                        KickUser();
                         return;
                     }
                 }
@@ -146,21 +155,24 @@ namespace GoogleAuthClone
 
         private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (exitImmediately)
+            if (!exitImmediately && e.CloseReason != CloseReason.UserClosing)
             {
                 SaveSettings();
                 return;
             }
-            if (e.CloseReason != CloseReason.ApplicationExitCall)
+            else if (exitImmediately)
             {
-                DialogResult ret = MessageBox.Show(
-                   this, "Are you sure you want to exit the program?", "ABOUT TO CLOSE PROGRAM", MessageBoxButtons.YesNo,
-                   MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
-                if (ret == DialogResult.Yes)
-                    SaveSettings();
-                else
-                    e.Cancel = true;
+                return;
             }
+
+            DialogResult ret = MessageBox.Show(
+               this, "Are you sure you want to exit the program?", "ABOUT TO CLOSE PROGRAM", MessageBoxButtons.YesNo,
+               MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
+            if (ret == DialogResult.Yes)
+                SaveSettings();
+            else
+                e.Cancel = true;
+
         }
 
         private void SaveSettings()
@@ -183,7 +195,17 @@ namespace GoogleAuthClone
 
         private void frmMain_Load(object sender, EventArgs e)
         {
+            timeOutFullWidth = pbTimeOut.Width; // grab the full width at startup and use this as the reference
+        }
 
+        private void KickUser(string additionalMessages = null)
+        {
+            exitImmediately = true;
+            if (additionalMessages != null)
+                MessageBox.Show("NO SOUP FOR YOU!\r\n" + additionalMessages);
+            else
+                MessageBox.Show("NO SOUP FOR YOU!");
+            Application.Exit();
         }
 
         private void lbAccounts_SelectedIndexChanged(object sender, EventArgs e)

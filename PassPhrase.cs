@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Security.Cryptography;
 
 namespace GoogleAuthClone
 {
     public class PassPhrase
     {
         private byte[] _key = null;
-        private byte[] _tweak = null;
         private int bruteCount = 10;
 
         public const string ComplexitySpecialChars = "~!@#$%^&*()_+-=[]{}<>/?.";
@@ -65,6 +65,8 @@ namespace GoogleAuthClone
             if (Initialized)
                 throw new InvalidOperationException("Cannot set a new passphrase if it has already been set, use Change instead, or Clear first.");
 
+            HMACSHA256 hash = new HMACSHA256();
+            System.Text.UTF8Encoding encoder = new UTF8Encoding(true, true);
             string resultingPassPhrase = string.Empty;
             frmPassPhrase myPass = new frmPassPhrase();
             myPass.Tag = null;
@@ -76,10 +78,8 @@ namespace GoogleAuthClone
             myPass.Dispose();
             if (ret == System.Windows.Forms.DialogResult.OK)
             {
-                _key = SkeinLib.Skein512Ex.DeriveKeyFromPassword(
-                       resultingPassPhrase,
-                       new byte[] { 0xff, 0xee, 0xdd, 0xcc, 0x00, 0x11, 0x22, 0x33 });
-                SetTweak();
+                hash.Key = new byte[] { 0xff, 0xee, 0xdd, 0xcc, 0x00, 0x11, 0x22, 0x33 };
+                _key = hash.ComputeHash(encoder.GetBytes(resultingPassPhrase));
                 return true;
             }
             else
@@ -122,10 +122,10 @@ namespace GoogleAuthClone
             myNewPass.Dispose();
             if (ret == System.Windows.Forms.DialogResult.OK)
             {
-                _key = SkeinLib.Skein512Ex.DeriveKeyFromPassword(
-                       resultingPassPhrase,
-                       new byte[] { 0xff, 0xee, 0xdd, 0xcc, 0x00, 0x11, 0x22, 0x33 });
-                SetTweak();
+                HMACSHA256 hash = new HMACSHA256();
+                System.Text.UTF8Encoding encoder = new UTF8Encoding(true, true);
+                hash.Key = new byte[] { 0xff, 0xee, 0xdd, 0xcc, 0x00, 0x11, 0x22, 0x33 };
+                _key = hash.ComputeHash(encoder.GetBytes(resultingPassPhrase));
                 return true;
             }
             else
@@ -139,14 +139,6 @@ namespace GoogleAuthClone
             if (Initialized)
                 throw new InvalidOperationException("Cannot set a new passphrase if it has already been set, use Change instead, or Clear first.");
             _key = (byte[])key.Clone();
-            SetTweak();
-        }
-
-        private void SetTweak()
-        {
-            if (_key == null)
-                return;
-            _tweak = SkeinLib.Skein512Ex.DeriveKey(_key, "TWEAK", 128);
         }
 
         /// <summary>
@@ -159,6 +151,8 @@ namespace GoogleAuthClone
             if (!Initialized)
                 throw new InvalidOperationException("Cannot challange a non-existant passphrase");
 
+            HMACSHA256 hash = new HMACSHA256();
+            System.Text.UTF8Encoding encoder = new UTF8Encoding(true, true);
             string resultingPassPhrase = string.Empty;
             string first = Convert.ToBase64String(_key);
             frmPassPhrase thePass = new frmPassPhrase();
@@ -172,9 +166,9 @@ namespace GoogleAuthClone
                 if (ret == DialogResult.OK)
                 {
                     resultingPassPhrase = (string)thePass.Tag;
-                    thePassBytes = SkeinLib.Skein512Ex.DeriveKeyFromPassword(
-                           resultingPassPhrase,
-                           new byte[] { 0xff, 0xee, 0xdd, 0xcc, 0x00, 0x11, 0x22, 0x33 });
+                    hash.Key = new byte[] { 0xff, 0xee, 0xdd, 0xcc, 0x00, 0x11, 0x22, 0x33 };
+                    thePassBytes = hash.ComputeHash(encoder.GetBytes(resultingPassPhrase));
+                    
                     if (string.Compare(first, Convert.ToBase64String(thePassBytes), false) != 0)
                     {
                         if (--bruteCount == 0)
@@ -212,6 +206,8 @@ namespace GoogleAuthClone
             if (!this.Challange(originalOwner))
                 return false;
 
+            HMACSHA256 hash = new HMACSHA256();
+            System.Text.UTF8Encoding encoder = new UTF8Encoding(true, true);
             string resultingPassPhrase = string.Empty;
             byte[] NEWSECRETKEY = null;
             frmPassPhrase myNewPass = new frmPassPhrase();
@@ -236,20 +232,19 @@ namespace GoogleAuthClone
             myNewPass.Dispose();
             if (ret == System.Windows.Forms.DialogResult.OK)
             {
-                NEWSECRETKEY = SkeinLib.Skein512Ex.DeriveKeyFromPassword(
-                       resultingPassPhrase,
-                       new byte[] { 0xff, 0xee, 0xdd, 0xcc, 0x00, 0x11, 0x22, 0x33 });
-                if (accounts.Count > 0)
+                hash.Key = new byte[] { 0xff, 0xee, 0xdd, 0xcc, 0x00, 0x11, 0x22, 0x33 };
+                NEWSECRETKEY = hash.ComputeHash(encoder.GetBytes(resultingPassPhrase));
+                /*if (accounts.Count > 0)
                 {
                     for (int i = 0; i < accounts.Count; i++)
                     {
-                        byte[] buffer = accounts[i].GetDecryptedSecret(_key);
-                        accounts[i].SetEncryptedSecret(buffer, NEWSECRETKEY);
+#warning This doesn't protect anything!
+                        byte[] buffer = accounts[i].GetSecret();
+                        accounts[i].SetEncodedSecret(buffer);
                     }
-                }
+                }*/
                 Buffer.BlockCopy(NEWSECRETKEY, 0, _key, 0, NEWSECRETKEY.Length);
-                SkeinLib.SkeinCore.ClearBytes(NEWSECRETKEY);
-                SetTweak();
+
                 return true;
             }
             else
@@ -262,7 +257,7 @@ namespace GoogleAuthClone
         {
             if (!Initialized)
                 throw new InvalidOperationException("There is no passphrase to apply.  Try using Set first.");
-            UTF8Encoding myEncoder = new UTF8Encoding();
+            UTF8Encoding myEncoder = new UTF8Encoding(true,true);
             return this.Apply(myEncoder.GetBytes(stuff));
         }
 
@@ -270,9 +265,10 @@ namespace GoogleAuthClone
         {
             if (!Initialized)
                 throw new InvalidOperationException("There is no passphrase to apply.  Try using Set first.");
-            return Convert.ToBase64String(
-                SkeinLib.ThreeFish.ThreeFish512Bytes(stuff, _key, _tweak),
-                Base64FormattingOptions.InsertLineBreaks);
+
+            stuff = AESEncipher(stuff, _key);
+            
+            return Convert.ToBase64String(stuff, Base64FormattingOptions.InsertLineBreaks);
         }
 
         public string RemoveFromString(string inBase64Stuff)
@@ -280,28 +276,45 @@ namespace GoogleAuthClone
             if (!Initialized)
                 throw new InvalidOperationException("There is no passphrase to remove.  Try using Set first.");
             byte[] buffer = Convert.FromBase64String(inBase64Stuff);
-            UTF8Encoding myEncoder = new UTF8Encoding();
-            return myEncoder.GetString(
-                SkeinLib.ThreeFish.InvThreeFish512Bytes(buffer, _key, _tweak));
+            UTF8Encoding myEncoder = new UTF8Encoding(true, true);
+
+            return myEncoder.GetString(AESDecipher(buffer, _key));
         }
 
         public byte[] RemoveFromBytes(string inBase64Stuff)
         {
             if (!Initialized)
                 throw new InvalidOperationException("There is no passphrase to remove.  Try using Set first.");
-            return SkeinLib.ThreeFish.InvThreeFish512Bytes(
-                Convert.FromBase64String(inBase64Stuff),
-                _key,
-                _tweak);
+            byte[] buffer = Convert.FromBase64String(inBase64Stuff);
+
+            return AESDecipher(buffer, _key);
         }
 
         public void Clear()
         {
-            SkeinLib.SkeinCore.ClearBytes(_key);
             _key = null;
-            SkeinLib.SkeinCore.ClearBytes(_tweak);
-            _tweak = null;
         }
+
+        internal byte[] AESEncipher(byte[] stuff, byte[] key)
+        {
+            AesManaged a = new AesManaged();
+            a.Mode = CipherMode.CBC;
+            a.Padding = PaddingMode.ANSIX923;
+            ICryptoTransform ict = a.CreateEncryptor(key, new byte[] { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff });
+            byte[] ct = ict.TransformFinalBlock(stuff, 0, stuff.Length);
+            return ct;
+        }
+
+        internal byte[] AESDecipher(byte[] stuff, byte[] key)
+        {
+            AesManaged a = new AesManaged();
+            a.Mode = CipherMode.CBC;
+            a.Padding = PaddingMode.ANSIX923;
+            ICryptoTransform ict = a.CreateDecryptor(key, new byte[] { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff });
+            byte[] ct = ict.TransformFinalBlock(stuff, 0, stuff.Length);
+            return ct;
+        }
+
 
     }//end class
 }

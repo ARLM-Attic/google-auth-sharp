@@ -27,6 +27,17 @@ namespace GoogleAuthClone
                 myStream.Close();
                 return true;
             }
+            catch (System.ArgumentException aex)
+            {
+                if (aex.Message == "URI formats are not supported.")
+                {
+                    aex = null;
+                    exception = new System.IO.FileLoadException("Network folders (or redirected folders that point to the network) are not currently supported.  If a network location must be used, map it to a drive letter.");
+                }
+                else
+                    exception = aex;
+                return false;
+            }
             catch (Exception ex)
             {
                 exception = ex;
@@ -49,6 +60,17 @@ namespace GoogleAuthClone
                     return null;
                 else
                     return File.ReadAllText(theFile);
+            }
+            catch (System.ArgumentException aex)
+            {
+                if (aex.Message == "URI formats are not supported.")
+                {
+                    aex = null;
+                    exception = new System.IO.FileLoadException("Network folders (or redirected folders that point to the network) are not currently supported.  If a network location must be used, map it to a drive letter.");
+                }
+                else
+                    exception = aex;
+                return null;
             }
             catch (Exception ex)
             {
