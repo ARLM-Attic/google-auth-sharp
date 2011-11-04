@@ -48,14 +48,14 @@
             // 
             this.lblCode.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(255)))));
             this.lblCode.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.lblCode.Font = new System.Drawing.Font("OCR-B 10 BT", 36F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCode.Font = new System.Drawing.Font("Consolas", 36F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblCode.Location = new System.Drawing.Point(12, 129);
             this.lblCode.Name = "lblCode";
-            this.lblCode.Padding = new System.Windows.Forms.Padding(10);
-            this.lblCode.Size = new System.Drawing.Size(361, 62);
+            this.lblCode.Size = new System.Drawing.Size(293, 62);
             this.lblCode.TabIndex = 0;
             this.lblCode.Text = "==========";
             this.lblCode.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblCode.UseMnemonic = false;
             this.lblCode.DoubleClick += new System.EventHandler(this.lblCode_DoubleClick);
             // 
             // tmrGetCodes
@@ -68,7 +68,7 @@
             this.butAdd.BackColor = System.Drawing.Color.Lime;
             this.butAdd.FlatAppearance.BorderColor = System.Drawing.Color.Black;
             this.butAdd.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.butAdd.Location = new System.Drawing.Point(12, 238);
+            this.butAdd.Location = new System.Drawing.Point(12, 222);
             this.butAdd.Name = "butAdd";
             this.butAdd.Size = new System.Drawing.Size(85, 23);
             this.butAdd.TabIndex = 2;
@@ -81,7 +81,7 @@
             this.butDel.BackColor = System.Drawing.Color.Red;
             this.butDel.FlatAppearance.BorderColor = System.Drawing.Color.Black;
             this.butDel.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.butDel.Location = new System.Drawing.Point(103, 238);
+            this.butDel.Location = new System.Drawing.Point(103, 222);
             this.butDel.Name = "butDel";
             this.butDel.Size = new System.Drawing.Size(85, 23);
             this.butDel.TabIndex = 3;
@@ -94,7 +94,7 @@
             this.butEdit.BackColor = System.Drawing.Color.Cyan;
             this.butEdit.FlatAppearance.BorderColor = System.Drawing.Color.Black;
             this.butEdit.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.butEdit.Location = new System.Drawing.Point(194, 238);
+            this.butEdit.Location = new System.Drawing.Point(194, 222);
             this.butEdit.Name = "butEdit";
             this.butEdit.Size = new System.Drawing.Size(85, 23);
             this.butEdit.TabIndex = 4;
@@ -106,7 +106,7 @@
             // 
             this.butQuit.BackColor = System.Drawing.Color.Red;
             this.butQuit.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.butQuit.Location = new System.Drawing.Point(285, 238);
+            this.butQuit.Location = new System.Drawing.Point(285, 222);
             this.butQuit.Name = "butQuit";
             this.butQuit.Size = new System.Drawing.Size(88, 52);
             this.butQuit.TabIndex = 5;
@@ -119,7 +119,7 @@
             this.butCPP.BackColor = System.Drawing.Color.Cyan;
             this.butCPP.FlatAppearance.BorderColor = System.Drawing.Color.Black;
             this.butCPP.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.butCPP.Location = new System.Drawing.Point(12, 267);
+            this.butCPP.Location = new System.Drawing.Point(12, 251);
             this.butCPP.Name = "butCPP";
             this.butCPP.Size = new System.Drawing.Size(267, 23);
             this.butCPP.TabIndex = 6;
@@ -143,7 +143,7 @@
             // 
             this.label1.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label1.ForeColor = System.Drawing.Color.White;
-            this.label1.Location = new System.Drawing.Point(12, 215);
+            this.label1.Location = new System.Drawing.Point(12, 199);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(361, 20);
             this.label1.TabIndex = 8;
@@ -154,9 +154,9 @@
             // 
             this.pbTimeOut.BackColor = System.Drawing.Color.Blue;
             this.pbTimeOut.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.pbTimeOut.Location = new System.Drawing.Point(119, 194);
+            this.pbTimeOut.Location = new System.Drawing.Point(310, 166);
             this.pbTimeOut.Name = "pbTimeOut";
-            this.pbTimeOut.Size = new System.Drawing.Size(255, 18);
+            this.pbTimeOut.Size = new System.Drawing.Size(63, 25);
             this.pbTimeOut.TabIndex = 9;
             this.pbTimeOut.TabStop = false;
             this.pbTimeOut.Visible = false;
@@ -165,9 +165,9 @@
             // 
             this.label2.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label2.ForeColor = System.Drawing.Color.White;
-            this.label2.Location = new System.Drawing.Point(15, 194);
+            this.label2.Location = new System.Drawing.Point(310, 131);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(98, 18);
+            this.label2.Size = new System.Drawing.Size(63, 32);
             this.label2.TabIndex = 10;
             this.label2.Text = "CODE TIMEOUT:";
             this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -177,7 +177,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Navy;
-            this.ClientSize = new System.Drawing.Size(386, 301);
+            this.ClientSize = new System.Drawing.Size(386, 290);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.pbTimeOut);
             this.Controls.Add(this.label1);

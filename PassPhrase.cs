@@ -277,8 +277,11 @@ namespace GoogleAuthClone
                 throw new InvalidOperationException("There is no passphrase to remove.  Try using Set first.");
             byte[] buffer = Convert.FromBase64String(inBase64Stuff);
             UTF8Encoding myEncoder = new UTF8Encoding(true, true);
-
-            return myEncoder.GetString(AESDecipher(buffer, _key));
+            buffer = AESDecipher(buffer, _key);
+            if (buffer != null)
+                return myEncoder.GetString(buffer);
+            else
+                return string.Empty;
         }
 
         public byte[] RemoveFromBytes(string inBase64Stuff)
@@ -297,22 +300,40 @@ namespace GoogleAuthClone
 
         internal byte[] AESEncipher(byte[] stuff, byte[] key)
         {
-            AesManaged a = new AesManaged();
-            a.Mode = CipherMode.CBC;
-            a.Padding = PaddingMode.ANSIX923;
-            ICryptoTransform ict = a.CreateEncryptor(key, new byte[] { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff });
-            byte[] ct = ict.TransformFinalBlock(stuff, 0, stuff.Length);
-            return ct;
+            try
+            {
+                AesManaged a = new AesManaged();
+                a.Mode = CipherMode.CBC;
+                a.Padding = PaddingMode.ANSIX923;
+                ICryptoTransform ict = a.CreateEncryptor(key, new byte[] { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff });
+                byte[] ct = ict.TransformFinalBlock(stuff, 0, stuff.Length);
+                return ct;
+            }
+            catch (Exception ex)
+            {
+                //throw ex;
+                //MessageBox.Show(frmMain.ActiveForm, ex.ToString(), "EXCEPTION ON DECRYPT");
+                return null;
+            }
         }
 
         internal byte[] AESDecipher(byte[] stuff, byte[] key)
         {
-            AesManaged a = new AesManaged();
-            a.Mode = CipherMode.CBC;
-            a.Padding = PaddingMode.ANSIX923;
-            ICryptoTransform ict = a.CreateDecryptor(key, new byte[] { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff });
-            byte[] ct = ict.TransformFinalBlock(stuff, 0, stuff.Length);
-            return ct;
+            try
+            {
+                AesManaged a = new AesManaged();
+                a.Mode = CipherMode.CBC;
+                a.Padding = PaddingMode.ANSIX923;
+                ICryptoTransform ict = a.CreateDecryptor(key, new byte[] { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff });
+                byte[] ct = ict.TransformFinalBlock(stuff, 0, stuff.Length);
+                return ct;
+            }
+            catch (Exception ex)
+            {
+                //throw ex;
+                //MessageBox.Show(frmMain.ActiveForm, ex.ToString(), "EXCEPTION ON DECRYPT");
+                return null;
+            }
         }
 
 
