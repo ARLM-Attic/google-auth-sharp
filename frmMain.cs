@@ -52,12 +52,19 @@ namespace GoogleAuthClone
                     else
                         pbTimeOut.BackColor = Color.Blue;
                     pbTimeOut.Width = (int)(timeOutFullWidth * percent);
-                    pbTimeOut.Visible = true;
+                    lblTimeOut.Text = "TIMEOUT IN\r\n";
+                    try
+                    {
+                         lblTimeOut.Text += float.Parse(((1 - percent) * theSelected.Period).ToString()).ToString("0") + " SECONDS";
+                    }
+                    catch { }
                 }
                 else
                 {
                     lblCode.Text = "==========";
-                    pbTimeOut.Visible = false;
+                    lblTimeOut.Text = "No Code Selected";
+                    pbTimeOut.Width = (int)(timeOutFullWidth);
+                    pbTimeOut.BackColor = Color.Blue;
                 }
                 tmrGetCodes.Enabled = true;
             }
