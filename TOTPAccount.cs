@@ -130,7 +130,10 @@ namespace GoogleAuthClone
                     string[] pieces = thing.Split(new char[] { '=' });
                     switch (pieces[0].ToLower())
                     {
-                        case "secret": tempSecret = Base32Encoder.FromBase32String(pieces[1]); break;
+                        case "secret": 
+                            //Bug Fix:  make sure secret is lower case
+                            tempSecret = Base32Encoder.FromBase32String(pieces[1].ToLower()); 
+                            break;
                         case "digits": tempAcc.Digits = byte.Parse(pieces[1]); break;
                         case "period": tempAcc.Period = int.Parse(pieces[1]); break;
                         case "algorithm":

@@ -93,6 +93,9 @@ namespace System
 
         public static byte[] FromBase32String(string data)
         {
+            //sanity check, do lower case stuff only
+            data = data.ToLower();
+
             var outStream = new List<Byte>();
             byte[] dTable = InitialiseDecodingTable();
 
