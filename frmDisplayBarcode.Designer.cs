@@ -31,6 +31,8 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmDisplayBarcode));
             this.pbxBarcode = new System.Windows.Forms.PictureBox();
             this.lblNote = new System.Windows.Forms.Label();
+            this.lblKey = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pbxBarcode)).BeginInit();
             this.SuspendLayout();
             // 
@@ -51,21 +53,45 @@
             this.lblNote.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.lblNote.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblNote.ForeColor = System.Drawing.Color.White;
-            this.lblNote.Location = new System.Drawing.Point(12, 197);
+            this.lblNote.Location = new System.Drawing.Point(12, 228);
             this.lblNote.Name = "lblNote";
-            this.lblNote.Size = new System.Drawing.Size(354, 123);
+            this.lblNote.Size = new System.Drawing.Size(354, 145);
             this.lblNote.TabIndex = 1;
             this.lblNote.Text = "Note:";
             this.lblNote.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.lblNote.Click += new System.EventHandler(this.lblNote_Click);
+            // 
+            // lblKey
+            // 
+            this.lblKey.Font = new System.Drawing.Font("Arial Rounded MT Bold", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblKey.Location = new System.Drawing.Point(84, 195);
+            this.lblKey.Name = "lblKey";
+            this.lblKey.Size = new System.Drawing.Size(216, 33);
+            this.lblKey.TabIndex = 2;
+            this.lblKey.Text = "xxxxxxxxxxxxxxxx";
+            this.lblKey.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.lblKey.Click += new System.EventHandler(this.lblKey_Click);
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.Location = new System.Drawing.Point(81, 379);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(219, 16);
+            this.label1.TabIndex = 3;
+            this.label1.Text = "Click anywhere to close the window.";
+            this.label1.Click += new System.EventHandler(this.label1_Click);
             // 
             // frmDisplayBarcode
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Gray;
-            this.ClientSize = new System.Drawing.Size(378, 329);
+            this.ClientSize = new System.Drawing.Size(378, 404);
             this.ControlBox = false;
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.lblKey);
             this.Controls.Add(this.lblNote);
             this.Controls.Add(this.pbxBarcode);
             this.DoubleBuffered = true;
@@ -77,9 +103,11 @@
             this.Text = "ACCOUNT QR BARCODE";
             this.TopMost = true;
             this.Load += new System.EventHandler(this.frmDisplayBarcode_Load);
+            this.Shown += new System.EventHandler(this.frmDisplayBarcode_Shown);
             this.Click += new System.EventHandler(this.frmDisplayBarcode_Click);
             ((System.ComponentModel.ISupportInitialize)(this.pbxBarcode)).EndInit();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -87,5 +115,7 @@
 
         private System.Windows.Forms.PictureBox pbxBarcode;
         private System.Windows.Forms.Label lblNote;
+        private System.Windows.Forms.Label lblKey;
+        private System.Windows.Forms.Label label1;
     }
 }

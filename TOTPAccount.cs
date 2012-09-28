@@ -114,7 +114,7 @@ namespace GoogleAuthClone
         {
             if (!inString.StartsWith(URIHeader, false, System.Globalization.CultureInfo.InvariantCulture))
                 return null;
-            if (!inString.Contains("?secret="))
+            if (!inString.Contains("?secret=") && !inString.Contains("&secret="))
                 return null;
             TOTPAccount tempAcc = new TOTPAccount();
             byte[] tempSecret = null;

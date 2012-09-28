@@ -368,7 +368,7 @@ namespace GoogleAuthClone
                 {
                     return ta.Name == lbAccounts.SelectedItem.ToString();
                 });
-                frmDisplayBarcode theBarcodeForm = new frmDisplayBarcode(theAccount.ToString(ppStore.UseRaw()));
+                frmDisplayBarcode theBarcodeForm = new frmDisplayBarcode(theAccount.ToString(ppStore.UseRaw()), theAccount.EncodedSecret);
                 theBarcodeForm.ShowDialog(this);
             }
 
