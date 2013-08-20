@@ -32,7 +32,7 @@
             this.pbxBarcode = new System.Windows.Forms.PictureBox();
             this.lblNote = new System.Windows.Forms.Label();
             this.lblKey = new System.Windows.Forms.Label();
-            this.label1 = new System.Windows.Forms.Label();
+            this.lblClickReminder = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pbxBarcode)).BeginInit();
             this.SuspendLayout();
             // 
@@ -72,16 +72,16 @@
             this.lblKey.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             this.lblKey.Click += new System.EventHandler(this.lblKey_Click);
             // 
-            // label1
+            // lblClickReminder
             // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(81, 379);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(219, 16);
-            this.label1.TabIndex = 3;
-            this.label1.Text = "Click anywhere to close the window.";
-            this.label1.Click += new System.EventHandler(this.label1_Click);
+            this.lblClickReminder.AutoSize = true;
+            this.lblClickReminder.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblClickReminder.Location = new System.Drawing.Point(81, 379);
+            this.lblClickReminder.Name = "lblClickReminder";
+            this.lblClickReminder.Size = new System.Drawing.Size(219, 16);
+            this.lblClickReminder.TabIndex = 3;
+            this.lblClickReminder.Text = "Click anywhere to close the window.";
+            this.lblClickReminder.Click += new System.EventHandler(this.lblClickReminder_Click);
             // 
             // frmDisplayBarcode
             // 
@@ -90,7 +90,7 @@
             this.BackColor = System.Drawing.Color.Gray;
             this.ClientSize = new System.Drawing.Size(378, 404);
             this.ControlBox = false;
-            this.Controls.Add(this.label1);
+            this.Controls.Add(this.lblClickReminder);
             this.Controls.Add(this.lblKey);
             this.Controls.Add(this.lblNote);
             this.Controls.Add(this.pbxBarcode);
@@ -116,6 +116,6 @@
         private System.Windows.Forms.PictureBox pbxBarcode;
         private System.Windows.Forms.Label lblNote;
         private System.Windows.Forms.Label lblKey;
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label lblClickReminder;
     }
 }

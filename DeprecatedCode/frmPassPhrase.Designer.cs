@@ -1,4 +1,4 @@
-﻿namespace GoogleAuthClone
+﻿namespace GoogleAuthClone.Deprecated
 {
     partial class frmPassPhrase
     {
@@ -77,16 +77,16 @@
             this.lblPassPhrase.ForeColor = System.Drawing.Color.White;
             this.lblPassPhrase.Location = new System.Drawing.Point(12, 9);
             this.lblPassPhrase.Name = "lblPassPhrase";
-            this.lblPassPhrase.Size = new System.Drawing.Size(114, 16);
+            this.lblPassPhrase.Size = new System.Drawing.Size(177, 16);
             this.lblPassPhrase.TabIndex = 3;
-            this.lblPassPhrase.Text = "PASSPHRASE:";
+            this.lblPassPhrase.Text = "LEGACY PASSPHRASE:";
             // 
             // frmPassPhrase
             // 
             this.AcceptButton = this.btnOk;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(128)))), ((int)(((byte)(0)))));
+            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(128)))), ((int)(((byte)(64)))), ((int)(((byte)(0)))));
             this.CancelButton = this.btnCancel;
             this.ClientSize = new System.Drawing.Size(395, 99);
             this.ControlBox = false;

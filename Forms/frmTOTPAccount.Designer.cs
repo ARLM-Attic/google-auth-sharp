@@ -44,13 +44,15 @@
             this.lblPeriod = new System.Windows.Forms.Label();
             this.txtPeriod = new System.Windows.Forms.TextBox();
             this.butBarcode = new System.Windows.Forms.Button();
+            this.lblNameChecksum = new System.Windows.Forms.Label();
+            this.lblNameChecksumValue = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // btnOk
             // 
             this.btnOk.BackColor = System.Drawing.Color.Lime;
             this.btnOk.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnOk.Location = new System.Drawing.Point(12, 233);
+            this.btnOk.Location = new System.Drawing.Point(12, 262);
             this.btnOk.Name = "btnOk";
             this.btnOk.Size = new System.Drawing.Size(151, 31);
             this.btnOk.TabIndex = 8;
@@ -63,7 +65,7 @@
             this.btnCancel.BackColor = System.Drawing.Color.Red;
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.btnCancel.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnCancel.Location = new System.Drawing.Point(169, 233);
+            this.btnCancel.Location = new System.Drawing.Point(169, 262);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(144, 31);
             this.btnCancel.TabIndex = 9;
@@ -78,6 +80,7 @@
             this.txtName.Name = "txtName";
             this.txtName.Size = new System.Drawing.Size(301, 22);
             this.txtName.TabIndex = 0;
+            this.txtName.TextChanged += new System.EventHandler(this.txtName_TextChanged);
             // 
             // lblName
             // 
@@ -94,7 +97,7 @@
             // txtSecret
             // 
             this.txtSecret.Font = new System.Drawing.Font("Courier New", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtSecret.Location = new System.Drawing.Point(12, 85);
+            this.txtSecret.Location = new System.Drawing.Point(12, 114);
             this.txtSecret.Name = "txtSecret";
             this.txtSecret.Size = new System.Drawing.Size(301, 22);
             this.txtSecret.TabIndex = 3;
@@ -105,7 +108,7 @@
             this.lblSecret.BackColor = System.Drawing.Color.Transparent;
             this.lblSecret.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblSecret.ForeColor = System.Drawing.Color.White;
-            this.lblSecret.Location = new System.Drawing.Point(9, 60);
+            this.lblSecret.Location = new System.Drawing.Point(9, 89);
             this.lblSecret.Name = "lblSecret";
             this.lblSecret.Size = new System.Drawing.Size(154, 16);
             this.lblSecret.TabIndex = 8;
@@ -122,7 +125,7 @@
             this.rbB64.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.rbB64.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.rbB64.ForeColor = System.Drawing.Color.White;
-            this.rbB64.Location = new System.Drawing.Point(238, 54);
+            this.rbB64.Location = new System.Drawing.Point(238, 83);
             this.rbB64.Name = "rbB64";
             this.rbB64.Size = new System.Drawing.Size(64, 27);
             this.rbB64.TabIndex = 2;
@@ -141,7 +144,7 @@
             this.rbB32.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.rbB32.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.rbB32.ForeColor = System.Drawing.Color.White;
-            this.rbB32.Location = new System.Drawing.Point(169, 54);
+            this.rbB32.Location = new System.Drawing.Point(169, 83);
             this.rbB32.Name = "rbB32";
             this.rbB32.Size = new System.Drawing.Size(64, 27);
             this.rbB32.TabIndex = 1;
@@ -155,7 +158,7 @@
             this.lblAlgorithm.BackColor = System.Drawing.Color.Transparent;
             this.lblAlgorithm.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblAlgorithm.ForeColor = System.Drawing.Color.White;
-            this.lblAlgorithm.Location = new System.Drawing.Point(9, 119);
+            this.lblAlgorithm.Location = new System.Drawing.Point(9, 148);
             this.lblAlgorithm.Name = "lblAlgorithm";
             this.lblAlgorithm.Size = new System.Drawing.Size(115, 16);
             this.lblAlgorithm.TabIndex = 11;
@@ -173,7 +176,7 @@
             "SHA256",
             "SHA512",
             "MD5"});
-            this.cbAlgorithm.Location = new System.Drawing.Point(12, 138);
+            this.cbAlgorithm.Location = new System.Drawing.Point(12, 167);
             this.cbAlgorithm.Name = "cbAlgorithm";
             this.cbAlgorithm.Size = new System.Drawing.Size(96, 24);
             this.cbAlgorithm.TabIndex = 4;
@@ -184,7 +187,7 @@
             this.lblDigits.BackColor = System.Drawing.Color.Transparent;
             this.lblDigits.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblDigits.ForeColor = System.Drawing.Color.White;
-            this.lblDigits.Location = new System.Drawing.Point(140, 119);
+            this.lblDigits.Location = new System.Drawing.Point(140, 148);
             this.lblDigits.Name = "lblDigits";
             this.lblDigits.Size = new System.Drawing.Size(179, 16);
             this.lblDigits.TabIndex = 13;
@@ -203,7 +206,7 @@
             "8",
             "9",
             "10"});
-            this.cbDigits.Location = new System.Drawing.Point(143, 138);
+            this.cbDigits.Location = new System.Drawing.Point(143, 167);
             this.cbDigits.Name = "cbDigits";
             this.cbDigits.Size = new System.Drawing.Size(67, 24);
             this.cbDigits.TabIndex = 5;
@@ -214,7 +217,7 @@
             this.lblPeriod.BackColor = System.Drawing.Color.Transparent;
             this.lblPeriod.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblPeriod.ForeColor = System.Drawing.Color.White;
-            this.lblPeriod.Location = new System.Drawing.Point(9, 177);
+            this.lblPeriod.Location = new System.Drawing.Point(9, 206);
             this.lblPeriod.Name = "lblPeriod";
             this.lblPeriod.Size = new System.Drawing.Size(271, 16);
             this.lblPeriod.TabIndex = 15;
@@ -223,7 +226,7 @@
             // txtPeriod
             // 
             this.txtPeriod.Font = new System.Drawing.Font("Courier New", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtPeriod.Location = new System.Drawing.Point(12, 196);
+            this.txtPeriod.Location = new System.Drawing.Point(12, 225);
             this.txtPeriod.Name = "txtPeriod";
             this.txtPeriod.Size = new System.Drawing.Size(72, 22);
             this.txtPeriod.TabIndex = 7;
@@ -233,13 +236,34 @@
             // 
             this.butBarcode.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(192)))), ((int)(((byte)(192)))));
             this.butBarcode.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.butBarcode.Location = new System.Drawing.Point(12, 270);
+            this.butBarcode.Location = new System.Drawing.Point(12, 299);
             this.butBarcode.Name = "butBarcode";
             this.butBarcode.Size = new System.Drawing.Size(301, 29);
             this.butBarcode.TabIndex = 16;
             this.butBarcode.Text = "Use Barcode Image";
             this.butBarcode.UseVisualStyleBackColor = false;
             this.butBarcode.Click += new System.EventHandler(this.butBarcode_Click);
+            // 
+            // lblNameChecksum
+            // 
+            this.lblNameChecksum.AutoSize = true;
+            this.lblNameChecksum.ForeColor = System.Drawing.Color.White;
+            this.lblNameChecksum.Location = new System.Drawing.Point(12, 53);
+            this.lblNameChecksum.Name = "lblNameChecksum";
+            this.lblNameChecksum.Size = new System.Drawing.Size(134, 13);
+            this.lblNameChecksum.TabIndex = 17;
+            this.lblNameChecksum.Text = "As stored in Accounts.xml :";
+            // 
+            // lblNameChecksumValue
+            // 
+            this.lblNameChecksumValue.AutoSize = true;
+            this.lblNameChecksumValue.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblNameChecksumValue.ForeColor = System.Drawing.Color.White;
+            this.lblNameChecksumValue.Location = new System.Drawing.Point(152, 53);
+            this.lblNameChecksumValue.Name = "lblNameChecksumValue";
+            this.lblNameChecksumValue.Size = new System.Drawing.Size(140, 14);
+            this.lblNameChecksumValue.TabIndex = 18;
+            this.lblNameChecksumValue.Text = "[type a name first]";
             // 
             // frmTOTPAccount
             // 
@@ -248,8 +272,10 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Navy;
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(325, 311);
+            this.ClientSize = new System.Drawing.Size(325, 342);
             this.ControlBox = false;
+            this.Controls.Add(this.lblNameChecksumValue);
+            this.Controls.Add(this.lblNameChecksum);
             this.Controls.Add(this.butBarcode);
             this.Controls.Add(this.txtPeriod);
             this.Controls.Add(this.lblPeriod);
@@ -297,5 +323,7 @@
         private System.Windows.Forms.Label lblPeriod;
         private System.Windows.Forms.TextBox txtPeriod;
         private System.Windows.Forms.Button butBarcode;
+        private System.Windows.Forms.Label lblNameChecksum;
+        private System.Windows.Forms.Label lblNameChecksumValue;
     }
 }

@@ -5,8 +5,14 @@ using System.Text;
 using System.Windows.Forms;
 using System.Security.Cryptography;
 
-namespace GoogleAuthClone
+namespace GoogleAuthClone.Deprecated
 {
+
+
+    /// <summary>
+    /// this is depricated
+    /// </summary>
+    [Obsolete("This is being retired, do not use except to convert old accounts to new XML based accounts")]
     public class PassPhrase
     {
         private byte[] _key = null;
@@ -149,7 +155,7 @@ namespace GoogleAuthClone
         public bool Challange(IWin32Window originalOwner)
         {
             if (!Initialized)
-                throw new InvalidOperationException("Cannot challange a non-existant passphrase");
+                throw new InvalidOperationException("Nothing to challange, try Set first.");
 
             HMACSHA256 hash = new HMACSHA256();
             System.Text.UTF8Encoding encoder = new UTF8Encoding(true, true);
@@ -197,15 +203,17 @@ namespace GoogleAuthClone
         /// <param name="account">The generic list of TOTPAccounts to change.</param>
         /// <param name="originalOwner">The calling window handle.</param>
         /// <returns>true if the user provides the correct existing passphrase and succsessfully provides a new passphrase.</returns>
-        public bool Change(ref List<TOTPAccount> accounts, IWin32Window originalOwner)
+        public bool Change(ref Dictionary<string, TOTPAccount> accounts, IWin32Window originalOwner)
         {
             if (!this.Initialized)
                 throw new InvalidOperationException("Cannot change passphrase if one has not been established!");
             if (accounts == null)
                 throw new InvalidOperationException("Cannot change passphrase on the existing accounts if they are not passed in.");
             if (!this.Challange(originalOwner))
+            {
+                // make sure the user KNOWS the old passphrase (prevents nefarious activity if user walked away from unlocked terminal)
                 return false;
-
+            }
             HMACSHA256 hash = new HMACSHA256();
             System.Text.UTF8Encoding encoder = new UTF8Encoding(true, true);
             string resultingPassPhrase = string.Empty;
@@ -309,7 +317,7 @@ namespace GoogleAuthClone
                 byte[] ct = ict.TransformFinalBlock(stuff, 0, stuff.Length);
                 return ct;
             }
-            catch (Exception ex)
+            catch //(Exception ex)
             {
                 //throw ex;
                 //MessageBox.Show(frmMain.ActiveForm, ex.ToString(), "EXCEPTION ON DECRYPT");
@@ -328,7 +336,7 @@ namespace GoogleAuthClone
                 byte[] ct = ict.TransformFinalBlock(stuff, 0, stuff.Length);
                 return ct;
             }
-            catch (Exception ex)
+            catch //(Exception ex)
             {
                 //throw ex;
                 //MessageBox.Show(frmMain.ActiveForm, ex.ToString(), "EXCEPTION ON DECRYPT");

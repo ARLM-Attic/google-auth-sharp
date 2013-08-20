@@ -6,24 +6,16 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using MTK = MessagingToolkit;
-using MTKQRC = MessagingToolkit.QRCode;
+//using MTK = MessagingToolkit;
+//using MTKQRC = MessagingToolkit.QRCode;
 
 namespace GoogleAuthClone
 {
     public partial class frmGetBarcode : Form
     {
-        private GoogleAuthClone.PassPhrase thePPStore = null;
-
         public frmGetBarcode()
         {
-            throw new InvalidOperationException("Cannot instantiate a new form without parameters!");
-        }
-
-        public frmGetBarcode(ref GoogleAuthClone.PassPhrase thePass)
-        {
             InitializeComponent();
-            thePPStore = thePass;
         }
 
         private void btnCancel_Click(object sender, EventArgs e)
@@ -68,10 +60,21 @@ namespace GoogleAuthClone
                     }
                     try
                     {
-                        MTKQRC.Codec.QRCodeDecoder myQRDecoder1 = new MTKQRC.Codec.QRCodeDecoder();
+                        // old way
+                        /*MTKQRC.Codec.QRCodeDecoder myQRDecoder1 = new MTKQRC.Codec.QRCodeDecoder();
                         Bitmap myBitmap1 = new Bitmap(pbxBarcode.Image);
                         MTK.QRCode.Codec.Data.QRCodeBitmapImage myImage1 = new MTK.QRCode.Codec.Data.QRCodeBitmapImage(myBitmap1);
                         lblResult.Text = myQRDecoder1.decode(myImage1);
+                        //*/
+
+                        ZXing.BarcodeReader zbr = new ZXing.BarcodeReader { AutoRotate = true, TryHarder = true, TryInverted = true };
+                        zbr.PossibleFormats = new List<ZXing.BarcodeFormat>();
+                        zbr.PossibleFormats.Add(ZXing.BarcodeFormat.QR_CODE);
+                        var result = zbr.Decode(new Bitmap(pbxBarcode.Image));
+                        if (result != null)
+                        {
+                            lblResult.Text = result.Text;
+                        }
                         Application.DoEvents();
                     }
                     catch (Exception ex)
@@ -79,11 +82,11 @@ namespace GoogleAuthClone
                         MessageBox.Show(this, "There was a problem decoding the file: \r\n\r\n" +
                            ex.Message, "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return;
-                    }
+                    }//*/
                     TOTPAccount QRAccount = null;
                     try
                     {
-                        QRAccount = TOTPAccount.FromString(lblResult.Text, thePPStore.UseRaw());
+                        QRAccount = TOTPAccount.FromUriString(lblResult.Text);
                     }
                     catch (Exception ex)
                     {
@@ -110,7 +113,7 @@ namespace GoogleAuthClone
                 finally
                 {
                     this.Enabled = true;
-                }
+                }//*/
             }
         }
 

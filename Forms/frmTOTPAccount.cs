@@ -12,7 +12,7 @@ namespace GoogleAuthClone
     public partial class frmTOTPAccount : Form
     {
         private TOTPAccount theAccount = null;
-        private PassPhrase theLocalPass = null;
+        //private PassPhrase theLocalPass = null;
 
         public frmTOTPAccount()
         {
@@ -20,13 +20,13 @@ namespace GoogleAuthClone
             throw new InvalidOperationException("Cannot instantiate a new form without parameters!");
         }
 
-        public frmTOTPAccount(ref GoogleAuthClone.PassPhrase thePass, TOTPAccount someAccount = null)
+        public frmTOTPAccount(TOTPAccount someAccount = null)
         {
             if (someAccount != null)
-                theAccount = TOTPAccount.FromString(someAccount.ToString(thePass.UseRaw()), thePass.UseRaw());
+                theAccount = someAccount.Clone();
             else
                 theAccount = new TOTPAccount();
-            theLocalPass = thePass;
+            //theLocalPass = thePass;
             InitializeComponent();
         }
 
@@ -83,14 +83,9 @@ namespace GoogleAuthClone
                     return;
                 }
             }
-            if (string.IsNullOrWhiteSpace(txtName.Text))
+            if (string.IsNullOrWhiteSpace(txtName.Text) || txtSecret.Text.Length < 10)
             {
-                MessageBox.Show(this, "Name cannot be blank (or only whitespace)!", "BAD INPUT", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-            if (string.IsNullOrWhiteSpace(txtName.Text) || txtSecret.Text.Length < 16)
-            {
-                MessageBox.Show(this, "Secret must be at least 16 non-whitespace characters long!", "BAD INPUT", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(this, "Secret must be at least 10 non-whitespace characters long!", "BAD INPUT", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
             byte[] tempSecret = null;
@@ -98,7 +93,7 @@ namespace GoogleAuthClone
             {
                 if (rbB32.Checked)
                     tempSecret = Base32Encoder.FromBase32String(txtSecret.Text);
-                else
+                else if (rbB64.Checked)
                     tempSecret = Convert.FromBase64String(txtSecret.Text);
             }
             catch (Exception ex)
@@ -131,7 +126,7 @@ namespace GoogleAuthClone
                 "USE BARCODE TO OVERWRITE SETTINGS?", MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
             if (ret == System.Windows.Forms.DialogResult.OK)
             {
-                frmGetBarcode myBarCode = new frmGetBarcode(ref theLocalPass);
+                frmGetBarcode myBarCode = new frmGetBarcode();
                 myBarCode.Tag = null;
                 ret = myBarCode.ShowDialog(this);
                 if (ret == System.Windows.Forms.DialogResult.OK)
@@ -143,6 +138,14 @@ namespace GoogleAuthClone
                 }
                 myBarCode.Dispose();
             }
+        }
+
+        private void txtName_TextChanged(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrWhiteSpace(txtName.Text))
+                lblNameChecksumValue.Text = TOTPAccount.PreviewNameHash(txtName.Text);
+            else
+                lblNameChecksumValue.Text = "[type a name first]";
         }
 
     }

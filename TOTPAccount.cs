@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Text;
 using System.Xml;
+using System.Xml.Linq;
 using SSC = System.Security.Cryptography;
 
 namespace GoogleAuthClone
 {   
     public class TOTPAccount
     {
+        private static Guid nameHashSalt = new Guid("83C3DFDC-8A16-C1B2-9D6A-58421FD883A5");
+
         public enum TOTPAlgorithm : byte
         {
             SHA1 = 0,
@@ -54,13 +57,40 @@ namespace GoogleAuthClone
                 // if statement only used if the name is part of the encryption process for the secret
                 //if (string.IsNullOrWhiteSpace(_encryptedSecret))
                 _name = value;
+                _nameHash = PreviewNameHash(_name);
                 //else
                 //    throw new System.InvalidOperationException("Cannot rename account after secret has been set.");
             }
         }
-  
+
+        private string _nameHash = string.Empty;
+        public string SaltedNameHash { get { return _nameHash; } }
+
         private string _encodedSecret = string.Empty;
         public string EncodedSecret { get { return _encodedSecret; } }
+
+        public static string PreviewNameHash(string name)
+        {
+            string result = string.Empty;
+            UTF8Encoding myEncoder = new UTF8Encoding();
+            if (name.Length < 256)
+                name += new string('$', 256 - name.Length);
+            SSC.HMACSHA256 mySha = new SSC.HMACSHA256(nameHashSalt.ToByteArray());
+            byte[] buffer = mySha.ComputeHash(myEncoder.GetBytes(name));
+            mySha.Clear();
+            for (int i = 0; i < 256; i++)
+            {
+                mySha = new SSC.HMACSHA256();
+                buffer[0] = (byte)(i % 256);
+                buffer[1] = (byte)((buffer[1] + i) % 256);
+                mySha.Key = buffer;
+                buffer = mySha.ComputeHash(myEncoder.GetBytes(name));
+                mySha.Clear();
+            }
+            mySha = new SSC.HMACSHA256(nameHashSalt.ToByteArray());
+            result = Base32Encoder.ToBase32String(mySha.ComputeHash(myEncoder.GetBytes(name))).Substring(0, 20);
+            return result;
+        }
 
         public void SetEncodedSecret(string base32Secret)
         {
@@ -82,7 +112,13 @@ namespace GoogleAuthClone
         public void Clear()
         {
             _name = string.Empty;
+            _nameHash = string.Empty;
             _encodedSecret = string.Empty;
+        }
+
+        public TOTPAccount Clone()
+        {
+            return TOTPAccount.FromUriString(this.ToUriString());
         }
 
         public override string ToString()
@@ -90,27 +126,43 @@ namespace GoogleAuthClone
             return this.Name;
         }
 
-        //example URI for ToString and FromString
-        //otpauth://totp/some.email.address@gmail.com?secret=cbtu2gs6uesagw3p&digits=6&period=30
+        //example URI for ToUriString and FromUriString
+        //   otpauth://totp/some.email.address@gmail.com?secret=cbtu2gs6uesagw3p&digits=6&period=30
 
-        public string ToString(byte[] key)
+        public string ToUriString()
         {
             System.Text.UTF8Encoding myEncoder = new UTF8Encoding();
             StringBuilder sb = new StringBuilder();
 
             sb.Append(URIHeader); // REQUIRED
-            sb.Append(Name); // REQUIRED
-            sb.Append("?secret=" + EncodedSecret); // REQUIRED
-            if (Algorithm != TOTPAlgorithm.SHA1)
-                sb.Append("&algorithm=" + Algorithm.ToString()); //OPTIONAL
-            if (Digits != 6)
-                sb.Append("&digits=" + Digits.ToString()); //OPTIONAL
-            if (Period != 30)
-                sb.Append("&period=" + Period.ToString()); //OPTIONAL
+            sb.Append(this.Name); // REQUIRED
+            sb.Append("?secret=" + this.EncodedSecret); // REQUIRED
+            if (this.Algorithm != TOTPAlgorithm.SHA1)
+                sb.Append("&algorithm=" + this.Algorithm.ToString()); //OPTIONAL
+            if (this.Digits != 6)
+                sb.Append("&digits=" + this.Digits.ToString()); //OPTIONAL
+            if (this.Period != 30)
+                sb.Append("&period=" + this.Period.ToString()); //OPTIONAL
             return sb.ToString();
         }
 
-        public static TOTPAccount FromString(string inString, byte[] key)
+        public XElement ToXElement(bool includeNameHash)
+        {
+            XElement xeAccount = new XElement("TOTPAccount");
+            if (includeNameHash)
+                xeAccount.SetAttributeValue("saltednamehash", this.SaltedNameHash);
+            xeAccount.Add(new XElement("name", this.Name));
+            xeAccount.Add(new XElement("secret", this.EncodedSecret));
+            if (this.Algorithm != TOTPAlgorithm.SHA1)
+                xeAccount.Add(new XElement("algorithm", this.Algorithm.ToString()));
+            if (this.Digits != 6)
+                xeAccount.Add(new XElement("digits", this.Digits));
+            if (this.Period != 30)
+                xeAccount.Add(new XElement("period", this.Period));
+            return xeAccount;
+        }
+
+        public static TOTPAccount FromUriString(string inString)
         {
             if (!inString.StartsWith(URIHeader, false, System.Globalization.CultureInfo.InvariantCulture))
                 return null;
@@ -137,15 +189,13 @@ namespace GoogleAuthClone
                         case "digits": tempAcc.Digits = byte.Parse(pieces[1]); break;
                         case "period": tempAcc.Period = int.Parse(pieces[1]); break;
                         case "algorithm":
-                            switch (pieces[1].ToUpper())
+                            if (Enum.IsDefined(typeof(TOTPAlgorithm), pieces[1].ToUpperInvariant()))
                             {
-                                case "SHA1": tempAcc.Algorithm = TOTPAlgorithm.SHA1; break;
-                                case "SHA256": tempAcc.Algorithm = TOTPAlgorithm.SHA256; break;
-                                case "SHA512": tempAcc.Algorithm = TOTPAlgorithm.SHA512; break;
-                                case "MD5": tempAcc.Algorithm = TOTPAlgorithm.MD5; break;
-                                default:
-                                    return null;
+                                tempAcc.Algorithm = (TOTPAlgorithm)Enum.Parse(
+                                   typeof(TOTPAlgorithm), pieces[1].ToUpperInvariant());
                             }
+                            else
+                                return null;
                             break;
                     }
                 }
@@ -159,10 +209,31 @@ namespace GoogleAuthClone
 
                 return tempAcc;
             }
-            catch (Exception ex)
+            catch //(Exception ex)
             {
                 return null;
             }
+        }
+
+        public static TOTPAccount FromXElement(XElement source)
+        {
+            try
+            {
+                string tryThis = URIHeader +
+                    source.Element("name").Value +
+                    "?secret=" + source.Element("secret").Value;
+                if (source.Element("algorithm") != null)
+                    tryThis += "&algorithm=" + source.Element("algorithm").Value;
+                if (source.Element("period") != null)
+                    tryThis += "&period=" + source.Element("period").Value;
+                if (source.Element("digits") != null)
+                    tryThis += "&digits=" + source.Element("digits").Value;
+                return FromUriString(tryThis);
+            }
+            catch
+            {
+                return null;
+            }//*/
         }
 
         //ACTUAL CALCULATION METHODS
@@ -170,9 +241,9 @@ namespace GoogleAuthClone
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="key"></param>
+        /// <param name="secret"></param>
         /// <returns></returns>
-        public string ComputePIN(byte[] key, DateTime when)
+        public string ComputePIN(DateTime when)
         {
             SSC.HMAC myAlg = null;
             switch (Algorithm)
@@ -220,7 +291,7 @@ namespace GoogleAuthClone
         internal static UInt64 GetTimeCode(DateTime theDateTime, int interval)
         {
             if (DateTime.Compare(DateTime.Parse("1970/01/01 12:00:00AM"), theDateTime) > 0)
-                throw new InvalidOperationException("The DateTime object must represent a date after Jan 1, 1970 at midnight!");
+                throw new InvalidOperationException("The DateTime object must represent a date after Jan 1, 1970 at midnight (UTC)!");
             UInt64 epoch = (UInt64)((theDateTime.ToUniversalTime().Ticks - 621355968000000000) / 10000000);
             return epoch / (UInt64)(interval);
         }
@@ -233,5 +304,6 @@ namespace GoogleAuthClone
             Single result = (Single)rem / (long)this.Period;
             return result;
         }
+
     }
 }

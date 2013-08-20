@@ -6,7 +6,7 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 
-namespace GoogleAuthClone
+namespace GoogleAuthClone.Deprecated
 {
     public partial class frmPassPhrase : Form
     {
@@ -45,8 +45,10 @@ namespace GoogleAuthClone
                 //this.StartPosition = FormStartPosition.Manual;
                 this.Top += 15;
                 this.Left += 15;
+                
             }
             
         }
+
     }
 }

@@ -75,67 +75,80 @@
     <StartupObject>GoogleAuthClone.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="MessagingToolkit.QRCode">
-      <HintPath>..\..\Program Files (x86)\MessagingToolkit\MessagingToolkit-QRCode\QRCode\MessagingToolkit.QRCode.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="zxing, Version=0.11.0.0, Culture=neutral, PublicKeyToken=4e88037ac681fe60, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>ZXing\zxing.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="frmDisplayBarcode.cs">
+    <Compile Include="AccountPassPhrase.cs" />
+    <Compile Include="AccountXMLPersistance.cs" />
+    <Compile Include="Forms\frmAccountPassPhrase.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="frmDisplayBarcode.Designer.cs">
+    <Compile Include="Forms\frmAccountPassPhrase.Designer.cs">
+      <DependentUpon>frmAccountPassPhrase.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\frmDisplayBarcode.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\frmDisplayBarcode.Designer.cs">
       <DependentUpon>frmDisplayBarcode.cs</DependentUpon>
     </Compile>
-    <Compile Include="frmGetBarcode.cs">
+    <Compile Include="Forms\frmGetBarcode.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="frmGetBarcode.Designer.cs">
+    <Compile Include="Forms\frmGetBarcode.Designer.cs">
       <DependentUpon>frmGetBarcode.cs</DependentUpon>
     </Compile>
-    <Compile Include="PassPhrase.cs" />
-    <Compile Include="Persistence.cs" />
+    <Compile Include="DeprecatedCode\PassPhrase.cs" />
+    <Compile Include="DeprecatedCode\Persistence.cs" />
     <Compile Include="TOTPAccount.cs" />
     <Compile Include="Base32Encoder.cs" />
-    <Compile Include="frmTOTPAccount.cs">
+    <Compile Include="Forms\frmTOTPAccount.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="frmTOTPAccount.Designer.cs">
+    <Compile Include="Forms\frmTOTPAccount.Designer.cs">
       <DependentUpon>frmTOTPAccount.cs</DependentUpon>
     </Compile>
-    <Compile Include="frmMain.cs">
+    <Compile Include="Forms\frmMain.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="frmMain.Designer.cs">
+    <Compile Include="Forms\frmMain.Designer.cs">
       <DependentUpon>frmMain.cs</DependentUpon>
     </Compile>
-    <Compile Include="frmPassPhrase.cs">
+    <Compile Include="DeprecatedCode\frmPassPhrase.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="frmPassPhrase.Designer.cs">
+    <Compile Include="DeprecatedCode\frmPassPhrase.Designer.cs">
       <DependentUpon>frmPassPhrase.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="frmDisplayBarcode.resx">
+    <EmbeddedResource Include="Forms\frmAccountPassPhrase.resx">
+      <DependentUpon>frmAccountPassPhrase.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\frmDisplayBarcode.resx">
       <DependentUpon>frmDisplayBarcode.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="frmGetBarcode.resx">
+    <EmbeddedResource Include="Forms\frmGetBarcode.resx">
       <DependentUpon>frmGetBarcode.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="frmTOTPAccount.resx">
+    <EmbeddedResource Include="Forms\frmTOTPAccount.resx">
       <DependentUpon>frmTOTPAccount.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="frmMain.resx">
+    <EmbeddedResource Include="Forms\frmMain.resx">
       <DependentUpon>frmMain.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="frmPassPhrase.resx">
+    <EmbeddedResource Include="DeprecatedCode\frmPassPhrase.resx">
       <DependentUpon>frmPassPhrase.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -158,11 +171,20 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <None Include="ZXing\zxing.net.chm" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="gac1.ico" />
+    <Content Include="logo.png" />
     <Content Include="Padlock.ico" />
+    <Content Include="ScreenCaps\Login.png" />
+    <Content Include="ScreenCaps\MainForm.png" />
+    <Content Include="ZXing\VERSION.0.11.0.0.DOTNET4.txt" />
+    <Content Include="ZXing\zxing.dll" />
+    <Content Include="ZXing\zxing.pdb" />
+    <Content Include="ZXing\zxing.XML" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -1,19 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Reflection;
 using System.IO;
 using System.Windows.Forms;
-namespace GoogleAuthClone
+
+namespace GoogleAuthClone.Deprecated
 {
+
+    /// <summary>
+    /// this is depricated
+    /// </summary>
+    [Obsolete("This is being retired, do not use except to convert old accounts to new XML based accounts")]
     public static class Persistence
     {
         const string PersistedFileName = "Accounts.dat";
 
         static public bool PutAccountBlob(string blob, out Exception exception)
         {
-            exception = null;
+            throw new NotSupportedException();
+            /*exception = null;
             try
             {
                 string theAssembly = Assembly.GetAssembly(typeof(Persistence)).CodeBase;
@@ -42,7 +48,7 @@ namespace GoogleAuthClone
             {
                 exception = ex;
                 return false;
-            }
+            }*/
         }
 
         static public string GetAccountBlob(out Exception exception)
@@ -55,7 +61,6 @@ namespace GoogleAuthClone
                     theAssembly.Replace("file:///","")).Replace(
                     Path.GetFileName(theAssembly),"");
                 string theFile = thePath + PersistedFileName;
-                
                 if (!File.Exists(theFile))
                     return null;
                 else
