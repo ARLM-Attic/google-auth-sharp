@@ -311,6 +311,16 @@ namespace GoogleAuthClone
             {
                 accounts[accountName] = existingAccInput.Tag as TOTPAccount;
                 existingAccInput.Dispose();
+                // this destruction/rebuilding is necessary to get the list of names back in sync with the accounts dictionary
+                lbAccounts.Items.Clear();
+                Dictionary<string, TOTPAccount> updatedAccounts = new Dictionary<string,TOTPAccount>();
+                foreach (string n in accounts.Keys)
+                {
+                    updatedAccounts.Add(accounts[n].Name, accounts[n]);
+                    lbAccounts.Items.Add(accounts[n].Name);
+                }
+                accounts.Clear();
+                accounts = updatedAccounts;
                 lbAccounts.ClearSelected();
                 SaveSettings();
             }
