@@ -129,7 +129,7 @@ namespace GoogleAuthClone
         //example URI for ToUriString and FromUriString
         //   otpauth://totp/some.email.address@gmail.com?secret=cbtu2gs6uesagw3p&digits=6&period=30
 
-        public string ToUriString()
+        public string ToUriString(bool verbose = false)
         {
             System.Text.UTF8Encoding myEncoder = new UTF8Encoding();
             StringBuilder sb = new StringBuilder();
@@ -137,11 +137,11 @@ namespace GoogleAuthClone
             sb.Append(URIHeader); // REQUIRED
             sb.Append(this.Name); // REQUIRED
             sb.Append("?secret=" + this.EncodedSecret); // REQUIRED
-            if (this.Algorithm != TOTPAlgorithm.SHA1)
+            if (verbose || this.Algorithm != TOTPAlgorithm.SHA1)
                 sb.Append("&algorithm=" + this.Algorithm.ToString()); //OPTIONAL
-            if (this.Digits != 6)
+            if (verbose || this.Digits != 6)
                 sb.Append("&digits=" + this.Digits.ToString()); //OPTIONAL
-            if (this.Period != 30)
+            if (verbose || this.Period != 30)
                 sb.Append("&period=" + this.Period.ToString()); //OPTIONAL
             return sb.ToString();
         }

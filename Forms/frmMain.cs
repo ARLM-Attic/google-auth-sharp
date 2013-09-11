@@ -8,15 +8,19 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Windows.Forms;
 using SSC = System.Security.Cryptography;
+using System.Reflection;
+using System.IO;
 
 namespace GoogleAuthClone
 {
     public partial class frmMain : Form
     {
+        private bool accountsDirty = false;
         private Single timeOutFullWidth = 0;
-        private AccountPassPhrase appStore = new AccountPassPhrase();
+        private AccountPassPhrase11 appStore = new AccountPassPhrase11();
         private Dictionary<string, TOTPAccount> accounts = new Dictionary<string, TOTPAccount>();
         private bool exitImmediately = false;
+        private ApplicationSettings mySettings = new ApplicationSettings();
 
         public frmMain()
         {
@@ -76,13 +80,26 @@ namespace GoogleAuthClone
         {
             if (appStore.Initialized)
                 return; // this is because we've ALREADY gotten the user passphrase
+            string theAssembly = Assembly.GetAssembly(typeof(AccountXMLPersistance11)).CodeBase;
+            string thePath = Path.GetFullPath(
+                    theAssembly.Replace("file:///", "")).Replace(
+                    Path.GetFileName(theAssembly), "");
+            if (mySettings.LoadAppSettings())
+            {
+                this.Location = mySettings.FormLocation;
+                dlgLoadXML.InitialDirectory = mySettings.DefaultLoadDirectory;
+                dlgSaveBackup.InitialDirectory = mySettings.DefaultSaveDirectory;
+                this.TopMost = mySettings.AlwaysOnTop;
+                menuWindowAlwaysOnTop.Checked = mySettings.AlwaysOnTop;
+            }
 
             Exception readProblem = null;
             bool foundStuff = false;
             bool decryptedOk = false;
             bool containsXML = false;
+            byte[] masterSalt;
             DialogResult ret = DialogResult.Retry;
-            if (!AccountXMLPersistance.CheckForEncryptedAccounts(null, out foundStuff, out containsXML, out readProblem))
+            if (!AccountXMLPersistance11.CheckForEncryptedAccounts(null, out foundStuff, out containsXML, out masterSalt, out readProblem))
             {
                 if (readProblem != null)
                 {
@@ -95,7 +112,7 @@ namespace GoogleAuthClone
                 {
                     MessageBox.Show(this, "An invalid or empty Accounts.xml file was found on start up.  It will be renamed.",
                     "INVALID ACCOUNTS.XML FILE", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
-                    AccountXMLPersistance.RenameInvalidAccountsFile(out readProblem);
+                    AccountXMLPersistance11.RenameInvalidAccountsFile(out readProblem);
                     if (readProblem != null)
                     {
                         // uh oh, an exception happened, better tell the user and then get the heck out of dodge!
@@ -115,12 +132,12 @@ namespace GoogleAuthClone
             else
             {
                 // ok we've got encrypted stuff to find so get a passphrase from the user
-                if (!appStore.GetExisting(this))
+                if (!appStore.GetExisting(this, masterSalt))
                 {
                     KickUser();
                     return;
                 }
-                accounts = AccountXMLPersistance.GetEncryptedAccounts(null, appStore, out foundStuff, out decryptedOk, out readProblem);
+                accounts = AccountXMLPersistance11.GetEncryptedAccounts(null, appStore, out foundStuff, out decryptedOk, out readProblem);
                 if (!decryptedOk && readProblem == null)
                 {
                     //hmmm bad passphrase... ask again, and again...
@@ -131,14 +148,15 @@ namespace GoogleAuthClone
                         if (ret == DialogResult.Retry)
                         {
                             appStore.Clear();
-                            if (!appStore.GetExisting(this))
+                            if (!appStore.GetExisting(this, masterSalt))
                             {
                                 KickUser();
                                 return;
                             }
                             else
                             {
-                                accounts = AccountXMLPersistance.GetEncryptedAccounts(null, appStore, out foundStuff, out decryptedOk, out readProblem);
+                                accounts = AccountXMLPersistance11.GetEncryptedAccounts(
+                                    null, appStore, out foundStuff, out decryptedOk, out readProblem);
                             }
                         }
                         else
@@ -175,7 +193,9 @@ namespace GoogleAuthClone
         {
             if (!exitImmediately && e.CloseReason != CloseReason.UserClosing)
             {
-                SaveSettings();
+                if (accountsDirty) 
+                    SaveSettings();
+                mySettings.SaveAppSettings();
                 return;
             }
             else if (exitImmediately)
@@ -183,14 +203,21 @@ namespace GoogleAuthClone
                 return;
             }
 
-            DialogResult ret = MessageBox.Show(
-               this, "Are you sure you want to exit the program?", "ABOUT TO CLOSE PROGRAM", MessageBoxButtons.YesNo,
-               MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
-            if (ret == DialogResult.Yes)
-                SaveSettings();
-            else
-                e.Cancel = true;
-
+            if (accountsDirty)
+            {
+                DialogResult ret = MessageBox.Show(
+                  this, "Do you want to saves changes before exiting the program?\r\n\r\n" +
+                  "  Yes = Save, No = Exit WITHOUT saving, Cancel = Do not exit, do not save", 
+                  "UNSAVED CHANGES, CLOSE PROGRAM?", MessageBoxButtons.YesNoCancel,
+                  MessageBoxIcon.Question, MessageBoxDefaultButton.Button3);
+                if (ret == DialogResult.Yes)
+                    SaveSettings();
+                else if (ret == DialogResult.Cancel)
+                    e.Cancel = true;
+            }
+            mySettings.AlwaysOnTop = this.TopMost;
+            mySettings.FormLocation = this.Location;
+            mySettings.SaveAppSettings();
         }
 
         private void SaveSettings()
@@ -199,14 +226,16 @@ namespace GoogleAuthClone
             //old way removed for brevity
             if (accounts.Count > 0)
             {
-                if (!AccountXMLPersistance.PutEncryptedAccounts(null, accounts, appStore, true, out blobProblem))
+                if (!AccountXMLPersistance11.PutEncryptedAccounts(null, accounts, appStore, true, out blobProblem))
                     throw blobProblem;
+                accountsDirty = false;
             }
         }
 
         private void frmMain_Load(object sender, EventArgs e)
         {
             timeOutFullWidth = pbTimeOut.Width; // grab the full width at startup and use this as the reference
+            
         }
 
         private void KickUser(string additionalMessages = null)
@@ -234,7 +263,7 @@ namespace GoogleAuthClone
             this.Enabled = false;
             DialogResult ret = MessageBox.Show(this,
                 "Are you really sure you want to DELETE this account?\r\n\r\n" +
-                "THIS ACTION CANNOT BE UNDONE AND IS PERMANENT!",
+                "THIS ACTION CANNOT BE UNDONE AND IS PERMANENT!  This will also save any other pending changes to disk!",
                 "WARNING! THIS ACTION IS PERMANENT, REALLY DELETE?", MessageBoxButtons.YesNo,
                 MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
             if (ret == DialogResult.Yes)
@@ -250,7 +279,7 @@ namespace GoogleAuthClone
                     accounts.Remove(lbAccounts.SelectedItem as string);
                     lbAccounts.Items.RemoveAt(lbAccounts.SelectedIndex);
                     SaveSettings();
-                    MessageBox.Show("Ok, it's gone... forever.");
+                    MessageBox.Show("Ok, it's gone... forever. This and all other changes were saved to disk.");
                 }
             }
             this.Enabled = true;
@@ -278,7 +307,7 @@ namespace GoogleAuthClone
                     accounts.Add(theNewAcc.Name, theNewAcc);
                     int newItem = lbAccounts.Items.Add(theNewAcc.Name);
                     lbAccounts.ClearSelected();
-                    SaveSettings();
+                    accountsDirty = true;
                 }
             }
             catch (Exception ex)
@@ -309,20 +338,24 @@ namespace GoogleAuthClone
             DialogResult ret = existingAccInput.ShowDialog(this);
             if (ret == DialogResult.OK)
             {
-                accounts[accountName] = existingAccInput.Tag as TOTPAccount;
-                existingAccInput.Dispose();
-                // this destruction/rebuilding is necessary to get the list of names back in sync with the accounts dictionary
-                lbAccounts.Items.Clear();
-                Dictionary<string, TOTPAccount> updatedAccounts = new Dictionary<string,TOTPAccount>();
-                foreach (string n in accounts.Keys)
+                TOTPAccount editedAccount = existingAccInput.Tag as TOTPAccount;
+                if (editedAccount.ToUriString(true) != accounts[accountName].ToUriString(true))
                 {
-                    updatedAccounts.Add(accounts[n].Name, accounts[n]);
-                    lbAccounts.Items.Add(accounts[n].Name);
+                    accounts[accountName] = editedAccount;
+                    existingAccInput.Dispose();
+                    // this destruction/rebuilding is necessary to get the list of names back in sync with the accounts dictionary
+                    lbAccounts.Items.Clear();
+                    Dictionary<string, TOTPAccount> updatedAccounts = new Dictionary<string, TOTPAccount>();
+                    foreach (string n in accounts.Keys)
+                    {
+                        updatedAccounts.Add(accounts[n].Name, accounts[n]);
+                        lbAccounts.Items.Add(accounts[n].Name);
+                    }
+                    accounts.Clear();
+                    accounts = updatedAccounts;
+                    lbAccounts.ClearSelected();
+                    accountsDirty = true;
                 }
-                accounts.Clear();
-                accounts = updatedAccounts;
-                lbAccounts.ClearSelected();
-                SaveSettings();
             }
             this.Enabled = true;
             tmrGetCodes_Tick(this, new EventArgs());
@@ -361,6 +394,7 @@ namespace GoogleAuthClone
         private void menuWindowAlwaysOnTop_Click(object sender, EventArgs e)
         {
             this.TopMost = menuWindowAlwaysOnTop.Checked;
+            mySettings.AlwaysOnTop = this.TopMost;
         }
 
         private void menuPinCopy_Click(object sender, EventArgs e)
@@ -399,7 +433,7 @@ namespace GoogleAuthClone
             //return;
             bool foundLegacyStuff;
             Exception readProblem = null;
-            if (!AccountXMLPersistance.CheckForLegacyAccounts(out foundLegacyStuff, out readProblem) && readProblem == null)
+            if (!AccountXMLPersistance11.CheckForLegacyAccounts(out foundLegacyStuff, out readProblem) && readProblem == null)
             {
                 MessageBox.Show("Sorry, there doesn't appear to be a legacy Accounts.dat file in the program directory.");
                 return;
@@ -474,6 +508,7 @@ namespace GoogleAuthClone
                     {
                         accounts.Add(a, tempAccounts[a]);
                         lbAccounts.Items.Add(a);
+                        accountsDirty = true;
                     }
                 }
                 if (duplicates.Count > 0)
@@ -520,17 +555,18 @@ namespace GoogleAuthClone
                     "IMPORTING ACCOUNTS", MessageBoxButtons.OKCancel, MessageBoxIcon.Information);
             if (ret == DialogResult.OK)
             {
-                dlgLoadXML.InitialDirectory = Application.StartupPath;
+                //dlgLoadXML.InitialDirectory = mySettings.DefaultLoadDirectory;
                 ret = dlgLoadXML.ShowDialog(this);
                 Dictionary<string, TOTPAccount> tempEAccounts = null;
                 Dictionary<string, TOTPAccount> tempPAccounts = null;
                 if (ret == DialogResult.OK)
                 {
+                    mySettings.DefaultLoadDirectory = Path.GetFullPath(dlgLoadXML.FileName);
                     bool fileExists;
                     bool isXML;
                     bool isDecryptable;
                     Exception readError = null;
-                    if (!AccountXMLPersistance.CheckForAccounts(dlgLoadXML.FileName, out fileExists, out isXML, out readError))
+                    if (!AccountXMLPersistance11.CheckForAccounts(dlgLoadXML.FileName, out fileExists, out isXML, out readError))
                     {
                         if (readError != null)
                         {
@@ -553,7 +589,7 @@ namespace GoogleAuthClone
                     }
                     else
                     {
-                        tempPAccounts = AccountXMLPersistance.GetAccounts(dlgLoadXML.FileName, out isXML, out readError);
+                        tempPAccounts = AccountXMLPersistance11.GetAccounts(dlgLoadXML.FileName, out isXML, out readError);
                         if (readError != null)
                         {
                             MessageBox.Show(this, "Something went wrong!\r\n\r\n" + readError.Message,
@@ -561,7 +597,8 @@ namespace GoogleAuthClone
                             return;
                         }
                     }
-                    if (!AccountXMLPersistance.CheckForEncryptedAccounts(dlgLoadXML.FileName, out fileExists, out isXML, out readError))
+                    byte[] importedMasterSalt = null;
+                    if (!AccountXMLPersistance11.CheckForEncryptedAccounts(dlgLoadXML.FileName, out fileExists, out isXML, out importedMasterSalt, out readError))
                     {
                         if (readError != null)
                         {
@@ -584,10 +621,10 @@ namespace GoogleAuthClone
                     }
                     else
                     {
-                        AccountPassPhrase tempAppStore = new AccountPassPhrase();
-                        if (tempAppStore.GetExisting(this))
+                        AccountPassPhrase11 tempAppStore = new AccountPassPhrase11();
+                        if (tempAppStore.GetExisting(this, importedMasterSalt))
                         {
-                            tempEAccounts = AccountXMLPersistance.GetEncryptedAccounts(dlgLoadXML.FileName, tempAppStore,
+                            tempEAccounts = AccountXMLPersistance11.GetEncryptedAccounts(dlgLoadXML.FileName, tempAppStore,
                                out fileExists, out isDecryptable, out readError);
                             if (readError != null)
                             {
@@ -680,12 +717,13 @@ namespace GoogleAuthClone
                     "EXPORTING ALL ACCOUNTS", MessageBoxButtons.OKCancel, MessageBoxIcon.Information);
             if (ret == DialogResult.OK)
             {
-                dlgSaveBackup.InitialDirectory = Application.StartupPath;
+                //dlgSaveBackup.InitialDirectory = mySettings.DefaultSaveDirectory;
                 ret = dlgSaveBackup.ShowDialog(this);
                 if (ret == DialogResult.OK)
                 {
+                    mySettings.DefaultSaveDirectory = Path.GetFullPath(dlgSaveBackup.FileName);
                     Exception fileProblem = null;
-                    if (AccountXMLPersistance.PutEncryptedAccounts(dlgSaveBackup.FileName, accounts, appStore, true, out fileProblem))
+                    if (AccountXMLPersistance11.PutEncryptedAccounts(dlgSaveBackup.FileName, accounts, appStore, true, out fileProblem))
                     {
                         MessageBox.Show(this, "Ok, all done. Remember the passphrase for this file!  Seriously...");
                     }
@@ -716,12 +754,13 @@ namespace GoogleAuthClone
                 "EXPORTING ALL ACCOUNTS - PLAIN TEXT!", MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation);
             if (ret == DialogResult.OK)
             {
-                dlgSaveBackup.InitialDirectory = Application.StartupPath;
+                //dlgSaveBackup.InitialDirectory = mySettings.DefaultSaveDirectory;
                 ret = dlgSaveBackup.ShowDialog(this);
                 if (ret == DialogResult.OK)
                 {
+                    mySettings.DefaultSaveDirectory = Path.GetFullPath(dlgSaveBackup.FileName);
                     Exception fileProblem = null;
-                    if (AccountXMLPersistance.PutAccounts(dlgSaveBackup.FileName, accounts, true, out fileProblem))
+                    if (AccountXMLPersistance11.PutAccounts(dlgSaveBackup.FileName, accounts, true, out fileProblem))
                     {
                         MessageBox.Show(this, "Ok, all done. Remember to *protect* this file!  Seriously...");
                     }
@@ -738,6 +777,12 @@ namespace GoogleAuthClone
                 }
                 dlgSaveBackup.FileName = "";
             }
+        }
+
+        private void menuFileSave_Click(object sender, EventArgs e)
+        {
+            SaveSettings();
+            MessageBox.Show("Done");
         }
 
         //*/

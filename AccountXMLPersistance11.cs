@@ -9,29 +9,29 @@ using System.Windows.Forms;
 
 namespace GoogleAuthClone
 {
-    public class AccountXMLPersistance
+    public class AccountXMLPersistance11
     {
         const string PersistedFileName = "Accounts.xml";
         [Obsolete]
         const string PersistedLegacyFileName = "Accounts.dat";
 
         [Obsolete]
-        static public bool CheckForLegacyAccounts(out bool fileExists, out Exception exceptionArg)
+        static public bool CheckForLegacyAccounts(out bool FileExists, out Exception ExceptionArg)
         {
-            exceptionArg = null;
-            fileExists = false;
+            ExceptionArg = null;
+            FileExists = false;
             try
             {
-                string theAssembly = Assembly.GetAssembly(typeof(AccountXMLPersistance)).CodeBase;
+                string theAssembly = Assembly.GetAssembly(typeof(AccountXMLPersistance11)).CodeBase;
                 string thePath = Path.GetFullPath(
                     theAssembly.Replace("file:///", "")).Replace(
                     Path.GetFileName(theAssembly), "");
-                string theFile = thePath + PersistedLegacyFileName;
+                string theFile = thePath + PersistedLegacyFileName; // it's fine here, we are LOOKING for legacy data
                 if (!File.Exists(theFile))
                 {
                     return false;
                 }
-                fileExists = true;
+                FileExists = true;
                 string rawStuff = File.ReadAllText(theFile);
                 if (!string.IsNullOrWhiteSpace(rawStuff))
                 {
@@ -53,29 +53,30 @@ namespace GoogleAuthClone
                 if (aex.Message == "URI formats are not supported.")
                 {
                     aex = null;
-                    exceptionArg = new System.IO.FileLoadException("Network folders (or redirected folders that point to the network) are not currently supported.  If a network location must be used, map it to a drive letter.");
+                    ExceptionArg = new System.IO.FileLoadException("Network folders (or redirected folders that point to the network) are not currently supported.  If a network location must be used, map it to a drive letter.");
                 }
                 else
-                    exceptionArg = aex;
+                    ExceptionArg = aex;
                 return false;
             }
             catch (Exception ex)
             {
-                exceptionArg = ex;
+                ExceptionArg = ex;
                 return false;
             }
         }//*/
 
-        static public bool RenameLegacy(out Exception exceptionArg)
+        [Obsolete]
+        static public bool RenameLegacy(out Exception ExceptionArg)
         {
-            exceptionArg = null;
+            ExceptionArg = null;
             try
             {
-                string theAssembly = Assembly.GetAssembly(typeof(AccountXMLPersistance)).CodeBase;
+                string theAssembly = Assembly.GetAssembly(typeof(AccountXMLPersistance11)).CodeBase;
                 string thePath = Path.GetFullPath(
                     theAssembly.Replace("file:///", "")).Replace(
                     Path.GetFileName(theAssembly), "");
-                string theFile = thePath + PersistedLegacyFileName;
+                string theFile = thePath + PersistedLegacyFileName; // this is ok, we're LOOKING for lagacy stuff
                 if (!File.Exists(theFile))
                 {
                     return false;
@@ -89,17 +90,17 @@ namespace GoogleAuthClone
             }
             catch (Exception ex)
             {
-                exceptionArg = ex;
+                ExceptionArg = ex;
                 return false;
             } //*/
         }
 
-        static public bool RenameInvalidAccountsFile(out Exception exceptionArg)
+        static public bool RenameInvalidAccountsFile(out Exception ExceptionArg)
         {
-            exceptionArg = null;
+            ExceptionArg = null;
             try
             {
-                string theAssembly = Assembly.GetAssembly(typeof(AccountXMLPersistance)).CodeBase;
+                string theAssembly = Assembly.GetAssembly(typeof(AccountXMLPersistance11)).CodeBase;
                 string thePath = Path.GetFullPath(
                     theAssembly.Replace("file:///", "")).Replace(
                     Path.GetFileName(theAssembly), "");
@@ -117,22 +118,23 @@ namespace GoogleAuthClone
             }
             catch (Exception ex)
             {
-                exceptionArg = ex;
+                ExceptionArg = ex;
                 return false;
             } //*/
         }
 
-        static public bool CheckForEncryptedAccounts(string filename, out bool fileExists, out bool isValidXml, out Exception exceptionArg)
+        static public bool CheckForEncryptedAccounts(string filename, out bool FileExists, out bool IsValidXml, out byte[] MasterSalt, out Exception ExceptionArg)
         {
-            exceptionArg = null;
-            fileExists = false;
-            isValidXml = false;
+            ExceptionArg = null;
+            MasterSalt = null;
+            FileExists = false;
+            IsValidXml = false;
             try
             {
                 string theFile = filename;
                 if (string.IsNullOrWhiteSpace(theFile))
                 {
-                    string theAssembly = Assembly.GetAssembly(typeof(AccountXMLPersistance)).CodeBase;
+                    string theAssembly = Assembly.GetAssembly(typeof(AccountXMLPersistance11)).CodeBase;
                     string thePath = Path.GetFullPath(
                         theAssembly.Replace("file:///", "")).Replace(
                         Path.GetFileName(theAssembly), "");
@@ -143,17 +145,31 @@ namespace GoogleAuthClone
                 {
                     return false;
                 }
-                fileExists = true;
+                FileExists = true;
                 xdoc = XDocument.Parse(File.ReadAllText(theFile));
                 if (xdoc != null)
                 {
-                    isValidXml = true;
+                    IsValidXml = true;
                     IEnumerable<XElement> xeAccounts =
                         from el in xdoc.Root.Elements("EncryptedTOTPAccount")
                         select el;
                     if (xeAccounts.Count() > 0)
                     {
-                        return true;
+                        if (xdoc.Root.Attribute("version") != null &&
+                            !string.IsNullOrWhiteSpace(xdoc.Root.Attribute("version").Value) &&
+                            xdoc.Root.Attribute("version").Value == "1.1")
+                        {
+                            if (xdoc.Root.Attribute("mastersalt") != null &&
+                                !string.IsNullOrWhiteSpace(xdoc.Root.Attribute("mastersalt").Value))
+                            {
+                                MasterSalt = Convert.FromBase64String(xdoc.Root.Attribute("mastersalt").Value);
+                                return true;
+                            }
+                            else 
+                                return false;
+                        }
+                        else
+                            return false;
                     }
                     else
                         return false;
@@ -168,30 +184,30 @@ namespace GoogleAuthClone
                 if (aex.Message == "URI formats are not supported.")
                 {
                     aex = null;
-                    exceptionArg = new System.IO.FileLoadException("Network folders (or redirected folders that point to the network) are not currently supported.  If a network location must be used, map it to a drive letter.");
+                    ExceptionArg = new System.IO.FileLoadException("Network folders (or redirected folders that point to the network) are not currently supported.  If a network location must be used, map it to a drive letter.");
                 }
                 else
-                    exceptionArg = aex;
+                    ExceptionArg = aex;
                 return false;
             }
             catch (Exception ex)
             {
-                exceptionArg = ex;
+                ExceptionArg = ex;
                 return false;
             }//*/
         }
 
-        static public bool CheckForAccounts(string filename, out bool fileExists, out bool isValidXml, out Exception exceptionArg)
+        static public bool CheckForAccounts(string Filename, out bool FileExists, out bool IsValidXml, out Exception ExceptionArg)
         {
-            exceptionArg = null;
-            fileExists = false;
-            isValidXml = false;
+            ExceptionArg = null;
+            FileExists = false;
+            IsValidXml = false;
             try
             {
-                string theFile = filename;
+                string theFile = Filename;
                 if (string.IsNullOrWhiteSpace(theFile))
                 {
-                    string theAssembly = Assembly.GetAssembly(typeof(AccountXMLPersistance)).CodeBase;
+                    string theAssembly = Assembly.GetAssembly(typeof(AccountXMLPersistance11)).CodeBase;
                     string thePath = Path.GetFullPath(
                         theAssembly.Replace("file:///", "")).Replace(
                         Path.GetFileName(theAssembly), "");
@@ -202,17 +218,23 @@ namespace GoogleAuthClone
                 {
                     return false;
                 }
-                fileExists = true;
+                FileExists = true;
                 xdoc = XDocument.Parse(File.ReadAllText(theFile));
                 if (xdoc != null)
                 {
-                    isValidXml = true;
+                    IsValidXml = true;
                     IEnumerable<XElement> xeAccounts =
                         from el in xdoc.Root.Elements("TOTPAccount")
                         select el;
                     if (xeAccounts.Count() > 0)
                     {
-                        return true;
+                        //Don't worry about the version 1.1 requriement for UNENCRYPTED ACCOUNTS ONLY, this is an upgrade path
+                        /*if (xdoc.Root.Attribute("version") != null &&
+                            !string.IsNullOrWhiteSpace(xdoc.Root.Attribute("version").Value) &&
+                            xdoc.Root.Attribute("version").Value == "1.1") */
+                            return true;
+                        //else
+                        //    return false;
                     }
                     else
                         return false;
@@ -227,45 +249,46 @@ namespace GoogleAuthClone
                 if (aex.Message == "URI formats are not supported.")
                 {
                     aex = null;
-                    exceptionArg = new System.IO.FileLoadException("Network folders (or redirected folders that point to the network) are not currently supported.  If a network location must be used, map it to a drive letter.");
+                    ExceptionArg = new System.IO.FileLoadException("Network folders (or redirected folders that point to the network) are not currently supported.  If a network location must be used, map it to a drive letter.");
                 }
                 else
-                    exceptionArg = aex;
+                    ExceptionArg = aex;
                 return false;
             }
             catch (Exception ex)
             {
-                exceptionArg = ex;
+                ExceptionArg = ex;
                 return false;
             }//*/
         }
 
-
-        static public bool PutEncryptedAccounts(string fileName, Dictionary<string, TOTPAccount> theAccounts, AccountPassPhrase appStore, bool overwrite, out Exception exceptionArg)
+        static public bool PutEncryptedAccounts(string Filename, Dictionary<string, TOTPAccount> Accounts, AccountPassPhrase11 appStore, bool overwrite, out Exception exceptionArg)
         {
-            //if fileName is null/empty/whitespace, then save to the program directory
+            //if Filename is null/empty/whitespace, then save to the program directory
             exceptionArg = null;
             try
             {
-                string theFile = fileName;
+                string theFile = Filename;
                 if (string.IsNullOrWhiteSpace(theFile))
                 {
-                    string theAssembly = Assembly.GetAssembly(typeof(AccountXMLPersistance)).CodeBase;
+                    string theAssembly = Assembly.GetAssembly(typeof(AccountXMLPersistance11)).CodeBase;
                     string thePath = Path.GetFullPath(
                         theAssembly.Replace("file:///", "")).Replace(
                         Path.GetFileName(theAssembly), "");
                     theFile = thePath + PersistedFileName;
                 }
-                if (System.IO.File.Exists(fileName) && !overwrite)
+                if (System.IO.File.Exists(Filename) && !overwrite)
                 {
                     exceptionArg = new InvalidOperationException("Cannot overwrite an existing file if the 'overwrite' parameter is set to false.");
                     return false;
                 }
                 XElement xeAccounts = new XElement("Accounts");
-                foreach (TOTPAccount acc in theAccounts.Values)
+                xeAccounts.SetAttributeValue("version", "1.1");
+                xeAccounts.SetAttributeValue("mastersalt", Convert.ToBase64String(appStore.MasterSalt));
+                foreach (TOTPAccount acc in Accounts.Values)
                 {
                     // actual encryption is handled in the AccountPassPhrase class now
-                    xeAccounts.Add(appStore.EncryptXElement(acc.ToXElement(true), acc.SaltedNameHash));
+                    xeAccounts.Add(appStore.EncryptXElement(acc.ToXElement(true), "EncryptedTOTPAccount", acc.SaltedNameHash));
                 }
                 XDocument xdoc = new XDocument(new XDeclaration("1.0", "utf-8", "yes"), xeAccounts);
                 StreamWriter myStream = File.CreateText(theFile);
@@ -292,28 +315,29 @@ namespace GoogleAuthClone
             }//*/
         }
 
-        static public bool PutAccounts(string fileName, Dictionary<string, TOTPAccount> theAccounts, bool overwrite, out Exception exceptionArg)
+        static public bool PutAccounts(string Filename, Dictionary<string, TOTPAccount> Accounts, bool overwrite, out Exception exceptionArg)
         {
-            //if fileName is null/empty/whitespace, then save to the program directory
+            //if Filename is null/empty/whitespace, then save to the program directory
             exceptionArg = null;
             try
             {
-                string theFile = fileName;
+                string theFile = Filename;
                 if (string.IsNullOrWhiteSpace(theFile))
                 {
-                    string theAssembly = Assembly.GetAssembly(typeof(AccountXMLPersistance)).CodeBase;
+                    string theAssembly = Assembly.GetAssembly(typeof(AccountXMLPersistance11)).CodeBase;
                     string thePath = Path.GetFullPath(
                         theAssembly.Replace("file:///", "")).Replace(
                         Path.GetFileName(theAssembly), "");
                     theFile = thePath + PersistedFileName;
                 }
-                if (System.IO.File.Exists(fileName) && !overwrite)
+                if (System.IO.File.Exists(Filename) && !overwrite)
                 {
                     exceptionArg = new InvalidOperationException("Cannot overwrite an existing file if the 'overwrite' parameter is set to false.");
                     return false;
                 }
                 XElement xeAccounts = new XElement("Accounts");
-                foreach (TOTPAccount acc in theAccounts.Values)
+                xeAccounts.SetAttributeValue("version", "1.1");
+                foreach (TOTPAccount acc in Accounts.Values)
                 {
                     // actual encryption is handled in the AccountPassPhrase class now
                     xeAccounts.Add(acc.ToXElement(false));
@@ -343,83 +367,24 @@ namespace GoogleAuthClone
             }//*/
         }
 
-        static public Dictionary<string, TOTPAccount> GetEncryptedAccounts(string filename, AccountPassPhrase appStore, out bool foundData, out bool wasAbleToDecryptData, out Exception exceptionArg)
+        static public Dictionary<string, TOTPAccount> GetEncryptedAccounts(
+            string Filename, AccountPassPhrase11 AppStore, out bool FoundData, out bool WasAbleToDecryptData, out Exception ExceptionArg)
         {
-            exceptionArg = null;
+            ExceptionArg = null;
             Dictionary<string, TOTPAccount> results = new Dictionary<string,TOTPAccount>();
-            foundData = false;
-            wasAbleToDecryptData = false;
+            FoundData = false;
+            WasAbleToDecryptData = false;
+            if (!AppStore.Initialized || AppStore.MasterSalt == null)
+            {
+                ExceptionArg = new InvalidOperationException("User credentials not set or do not include a Master Salt. Unable to proceed.");
+                return null;
+            }   
             try
             {
-                string theFile = filename;
+                string theFile = Filename;
                 if (string.IsNullOrWhiteSpace(theFile))
                 {
-                    string theAssembly = Assembly.GetAssembly(typeof(AccountXMLPersistance)).CodeBase;
-                    string thePath = Path.GetFullPath(
-                        theAssembly.Replace("file:///", "")).Replace(
-                        Path.GetFileName(theAssembly), "");
-                     theFile = thePath + PersistedFileName;
-                }
-                XDocument xdoc = null;
-                if (!File.Exists(theFile))
-                {
-                    exceptionArg = new InvalidOperationException("File specified does not exist.");
-                    return null;
-                }
-                else
-                    xdoc = XDocument.Parse(File.ReadAllText(theFile));
-                if (xdoc != null)
-                {
-                    foundData = true;
-                    IEnumerable<XElement> xeAccounts =
-                        from el in xdoc.Root.Elements("EncryptedTOTPAccount")
-                        select el;
-                    foreach (XElement xeAccount in xeAccounts)
-                    {
-                        //actual decryption is handled in the AccountPassPhrase class now
-                        XElement thing = appStore.DecryptXElement(xeAccount);
-                        TOTPAccount newAcc = TOTPAccount.FromXElement(thing);
-                        if (newAcc != null)
-                        {
-                            wasAbleToDecryptData = true;
-                            results.Add(newAcc.Name, newAcc);
-                        }
-                        // be more fault tolerant, allow a few bad apples
-                        //else
-                        //    return null;
-                    }
-                }
-                return results;
-            }
-            catch (System.ArgumentException aex)
-            {
-                if (aex.Message == "URI formats are not supported.")
-                {
-                    aex = null;
-                    exceptionArg = new System.IO.FileLoadException("Network folders (or redirected folders that point to the network) are not currently supported.  If a network location must be used, map it to a drive letter.");
-                }
-                else
-                    exceptionArg = aex;
-                return null;
-            }
-            catch (Exception ex)
-            {
-                exceptionArg = ex;
-                return null;
-            }//*/
-        }
-
-        static public Dictionary<string, TOTPAccount> GetAccounts(string filename, out bool foundData, out Exception exceptionArg)
-        {
-            exceptionArg = null;
-            Dictionary<string, TOTPAccount> results = new Dictionary<string, TOTPAccount>();
-            foundData = false;
-            try
-            {
-                string theFile = filename;
-                if (string.IsNullOrWhiteSpace(theFile))
-                {
-                    string theAssembly = Assembly.GetAssembly(typeof(AccountXMLPersistance)).CodeBase;
+                    string theAssembly = Assembly.GetAssembly(typeof(AccountXMLPersistance11)).CodeBase;
                     string thePath = Path.GetFullPath(
                         theAssembly.Replace("file:///", "")).Replace(
                         Path.GetFileName(theAssembly), "");
@@ -428,28 +393,106 @@ namespace GoogleAuthClone
                 XDocument xdoc = null;
                 if (!File.Exists(theFile))
                 {
-                    exceptionArg = new InvalidOperationException("File specified does not exist.");
+                    ExceptionArg = new InvalidOperationException("File specified does not exist.");
                     return null;
                 }
                 else
                     xdoc = XDocument.Parse(File.ReadAllText(theFile));
                 if (xdoc != null)
                 {
-                    IEnumerable<XElement> xeAccounts =
-                        from el in xdoc.Root.Elements("TOTPAccount")
-                        select el;
-                    foreach (XElement xeAccount in xeAccounts)
+                    if (xdoc.Root.Attribute("version") != null &&
+                            !string.IsNullOrWhiteSpace(xdoc.Root.Attribute("version").Value) &&
+                            xdoc.Root.Attribute("version").Value == "1.1")
                     {
-                        TOTPAccount newAcc = TOTPAccount.FromXElement(xeAccount);
-                        if (newAcc != null)
+
+                        FoundData = true;
+                        IEnumerable<XElement> xeAccounts =
+                            from el in xdoc.Root.Elements("EncryptedTOTPAccount")
+                            select el;
+                        foreach (XElement xeAccount in xeAccounts)
                         {
-                            foundData = true;
-                            results.Add(newAcc.Name, newAcc);
+                            //actual decryption is handled in the AccountPassPhrase class now
+                            XElement thing = AppStore.DecryptXElement(xeAccount, "TOTPAccount");
+                            TOTPAccount newAcc = TOTPAccount.FromXElement(thing);
+                            if (newAcc != null)
+                            {
+                                WasAbleToDecryptData = true;
+                                results.Add(newAcc.Name, newAcc);
+                            }
+                            // be more fault tolerant, allow a few bad apples
+                            //else
+                            //    return null;
                         }
-                        // be more fault tolerant, allow a few bad apples
-                        //else
-                        //    return null;
                     }
+                }
+
+                return results;
+            }
+            catch (System.ArgumentException aex)
+            {
+                if (aex.Message == "URI formats are not supported.")
+                {
+                    aex = null;
+                    ExceptionArg = new System.IO.FileLoadException("Network folders (or redirected folders that point to the network) are not currently supported.  If a network location must be used, map it to a drive letter.");
+                }
+                else
+                    ExceptionArg = aex;
+                return null;
+            }
+            catch (Exception ex)
+            {
+                ExceptionArg = ex;
+                return null;
+            }//*/
+        }
+
+        static public Dictionary<string, TOTPAccount> GetAccounts(string Filename, out bool FoundData, out Exception ExceptionArg)
+        {
+            ExceptionArg = null;
+            Dictionary<string, TOTPAccount> results = new Dictionary<string, TOTPAccount>();
+            FoundData = false;
+            try
+            {
+                string theFile = Filename;
+                if (string.IsNullOrWhiteSpace(theFile))
+                {
+                    string theAssembly = Assembly.GetAssembly(typeof(AccountXMLPersistance11)).CodeBase;
+                    string thePath = Path.GetFullPath(
+                        theAssembly.Replace("file:///", "")).Replace(
+                        Path.GetFileName(theAssembly), "");
+                    theFile = thePath + PersistedFileName;
+                }
+                XDocument xdoc = null;
+                if (!File.Exists(theFile))
+                {
+                    ExceptionArg = new InvalidOperationException("File specified does not exist.");
+                    return null;
+                }
+                else
+                    xdoc = XDocument.Parse(File.ReadAllText(theFile));
+                if (xdoc != null)
+                {
+                    // don't worry about the 1.1 version requirement for UNENCRYPTED ACCOUNTS ONLY, this is an upgrade path
+                    /*if (xdoc.Root.Attribute("version") != null &&
+                            !string.IsNullOrWhiteSpace(xdoc.Root.Attribute("version").Value) &&
+                            xdoc.Root.Attribute("version").Value == "1.1")
+                    {*/
+                        IEnumerable<XElement> xeAccounts =
+                            from el in xdoc.Root.Elements("TOTPAccount")
+                            select el;
+                        foreach (XElement xeAccount in xeAccounts)
+                        {
+                            TOTPAccount newAcc = TOTPAccount.FromXElement(xeAccount);
+                            if (newAcc != null)
+                            {
+                                FoundData = true;
+                                results.Add(newAcc.Name, newAcc);
+                            }
+                            // be more fault tolerant, allow a few bad apples
+                            //else
+                            //    return null;
+                        }
+                    //}
                 }
                 return results;
             }
@@ -458,15 +501,15 @@ namespace GoogleAuthClone
                 if (aex.Message == "URI formats are not supported.")
                 {
                     aex = null;
-                    exceptionArg = new System.IO.FileLoadException("Network folders (or redirected folders that point to the network) are not currently supported.  If a network location must be used, map it to a drive letter.");
+                    ExceptionArg = new System.IO.FileLoadException("Network folders (or redirected folders that point to the network) are not currently supported.  If a network location must be used, map it to a drive letter.");
                 }
                 else
-                    exceptionArg = aex;
+                    ExceptionArg = aex;
                 return null;
             }
             catch (Exception ex)
             {
-                exceptionArg = ex;
+                ExceptionArg = ex;
                 return null;
             }//*/
         }

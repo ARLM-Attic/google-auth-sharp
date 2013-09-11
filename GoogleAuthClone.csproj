@@ -88,8 +88,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AccountPassPhrase.cs" />
-    <Compile Include="AccountXMLPersistance.cs" />
+    <Compile Include="AccountPassPhrase10.cs" />
+    <Compile Include="AccountXMLPersistance10.cs" />
+    <Compile Include="AccountPassPhrase11.cs" />
+    <Compile Include="AccountXMLPersistance11.cs" />
+    <Compile Include="ApplicationSettings.cs" />
     <Compile Include="Forms\frmAccountPassPhrase.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -110,6 +113,7 @@
     </Compile>
     <Compile Include="DeprecatedCode\PassPhrase.cs" />
     <Compile Include="DeprecatedCode\Persistence.cs" />
+    <Compile Include="PBKDF2.cs" />
     <Compile Include="TOTPAccount.cs" />
     <Compile Include="Base32Encoder.cs" />
     <Compile Include="Forms\frmTOTPAccount.cs">
@@ -162,15 +166,6 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <None Include="app.config" />
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-    </Compile>
     <None Include="ZXing\zxing.net.chm" />
   </ItemGroup>
   <ItemGroup>

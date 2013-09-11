@@ -60,6 +60,7 @@
             this.menuWindowAlwaysOnTop = new System.Windows.Forms.ToolStripMenuItem();
             this.dlgSaveBackup = new System.Windows.Forms.SaveFileDialog();
             this.dlgLoadXML = new System.Windows.Forms.OpenFileDialog();
+            this.menuFileSave = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.pbTimeOut)).BeginInit();
             this.menuMain.SuspendLayout();
             this.SuspendLayout();
@@ -157,6 +158,7 @@
             // menuFile
             // 
             this.menuFile.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.menuFileSave,
             this.menuFileAdd,
             this.menuFileEdit,
             this.menuFileDelete,
@@ -335,6 +337,13 @@
             this.dlgLoadXML.RestoreDirectory = true;
             this.dlgLoadXML.Title = "Import Accounts";
             // 
+            // menuFileSave
+            // 
+            this.menuFileSave.Name = "menuFileSave";
+            this.menuFileSave.Size = new System.Drawing.Size(285, 22);
+            this.menuFileSave.Text = "&Save Accounts";
+            this.menuFileSave.Click += new System.EventHandler(this.menuFileSave_Click);
+            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -400,6 +409,7 @@
         private System.Windows.Forms.ToolStripMenuItem menuFileExportEncrypted;
         private System.Windows.Forms.ToolStripMenuItem menuFileExportPlain;
         private System.Windows.Forms.OpenFileDialog dlgLoadXML;
+        private System.Windows.Forms.ToolStripMenuItem menuFileSave;
     }
 }
 
