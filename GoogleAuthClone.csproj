@@ -88,8 +88,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AccountPassPhrase10.cs" />
-    <Compile Include="AccountXMLPersistance10.cs" />
+    <Compile Include="DeprecatedCode\AccountPassPhrase10.cs" />
+    <Compile Include="DeprecatedCode\AccountXMLPersistance10.cs" />
     <Compile Include="AccountPassPhrase11.cs" />
     <Compile Include="AccountXMLPersistance11.cs" />
     <Compile Include="ApplicationSettings.cs" />

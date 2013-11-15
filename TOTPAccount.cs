@@ -164,6 +164,8 @@ namespace GoogleAuthClone
 
         public static TOTPAccount FromUriString(string inString)
         {
+            if (string.IsNullOrWhiteSpace(inString))
+                return null;
             if (!inString.StartsWith(URIHeader, false, System.Globalization.CultureInfo.InvariantCulture))
                 return null;
             if (!inString.Contains("?secret=") && !inString.Contains("&secret="))
@@ -217,6 +219,8 @@ namespace GoogleAuthClone
 
         public static TOTPAccount FromXElement(XElement source)
         {
+            if (source == null)
+                return null;
             try
             {
                 string tryThis = URIHeader +

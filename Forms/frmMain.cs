@@ -16,8 +16,9 @@ namespace GoogleAuthClone
     public partial class frmMain : Form
     {
         private bool accountsDirty = false;
+        private bool allowDirtyUpdates = false;
         private Single timeOutFullWidth = 0;
-        private AccountPassPhrase11 appStore = new AccountPassPhrase11();
+        private AccountPassPhrase11 userPP = new AccountPassPhrase11();
         private Dictionary<string, TOTPAccount> accounts = new Dictionary<string, TOTPAccount>();
         private bool exitImmediately = false;
         private ApplicationSettings mySettings = new ApplicationSettings();
@@ -25,7 +26,7 @@ namespace GoogleAuthClone
         public frmMain()
         {
             InitializeComponent();
-            appStore.BruteForceDetected += new System.EventHandler(this.OnBruteForce);
+            userPP.BruteForceDetected += new System.EventHandler(this.OnBruteForce);
             this.Shown += new EventHandler(frmMain_Shown);
         }
 
@@ -78,7 +79,8 @@ namespace GoogleAuthClone
         // NEW WAY
         private void frmMain_Shown(object sender, EventArgs e)
         {
-            if (appStore.Initialized)
+            allowDirtyUpdates = true;
+            if (userPP.Initialized)
                 return; // this is because we've ALREADY gotten the user passphrase
             string theAssembly = Assembly.GetAssembly(typeof(AccountXMLPersistance11)).CodeBase;
             string thePath = Path.GetFullPath(
@@ -97,7 +99,9 @@ namespace GoogleAuthClone
             bool foundStuff = false;
             bool decryptedOk = false;
             bool containsXML = false;
-            byte[] masterSalt;
+            byte[] masterSalt; //the master salt will be read from the Accounts.XML file when it is checked
+            // this salt is needed when decrypting the individual accounts, as the passphrase is calculated using that master hash
+
             DialogResult ret = DialogResult.Retry;
             if (!AccountXMLPersistance11.CheckForEncryptedAccounts(null, out foundStuff, out containsXML, out masterSalt, out readProblem))
             {
@@ -107,7 +111,7 @@ namespace GoogleAuthClone
                     KickUser(readProblem.Message);
                     return;
                 }
-                //this is weird!  Not sure what happened here?  empty file, not xml, something else?
+                //this is weird!  Not sure what happened here?  empty file, not xml, wrong file version (not 1.1), something else?
                 if (foundStuff)
                 {
                     MessageBox.Show(this, "An invalid or empty Accounts.xml file was found on start up.  It will be renamed.",
@@ -121,9 +125,9 @@ namespace GoogleAuthClone
                     }
                 }
                 //anyways, create a new passphrase for any new accounts
-                if (!appStore.SetNew(this))
+                if (!userPP.SetNew(this))
                 {
-                    // not the time to be rude
+                    // user didn't want to, not the time to be rude
                     exitImmediately = true;
                     Application.Exit();
                     return;
@@ -132,12 +136,12 @@ namespace GoogleAuthClone
             else
             {
                 // ok we've got encrypted stuff to find so get a passphrase from the user
-                if (!appStore.GetExisting(this, masterSalt))
+                if (!userPP.GetExisting(this, masterSalt)) // use the salt we found when we checked for the accounts.
                 {
                     KickUser();
                     return;
                 }
-                accounts = AccountXMLPersistance11.GetEncryptedAccounts(null, appStore, out foundStuff, out decryptedOk, out readProblem);
+                accounts = AccountXMLPersistance11.GetEncryptedAccounts(null, userPP, out foundStuff, out decryptedOk, out readProblem);
                 if (!decryptedOk && readProblem == null)
                 {
                     //hmmm bad passphrase... ask again, and again...
@@ -147,8 +151,8 @@ namespace GoogleAuthClone
                             "Incorrect passphrase, try again", MessageBoxButtons.RetryCancel, MessageBoxIcon.Exclamation);
                         if (ret == DialogResult.Retry)
                         {
-                            appStore.Clear();
-                            if (!appStore.GetExisting(this, masterSalt))
+                            userPP.Clear();
+                            if (!userPP.GetExisting(this, masterSalt))
                             {
                                 KickUser();
                                 return;
@@ -156,11 +160,12 @@ namespace GoogleAuthClone
                             else
                             {
                                 accounts = AccountXMLPersistance11.GetEncryptedAccounts(
-                                    null, appStore, out foundStuff, out decryptedOk, out readProblem);
+                                    null, userPP, out foundStuff, out decryptedOk, out readProblem);
                             }
                         }
                         else
                         {
+                            //user hit cancel, just leave
                             KickUser();
                             return;
                         }
@@ -180,6 +185,7 @@ namespace GoogleAuthClone
                 }
             }
             tmrGetCodes.Enabled = true;
+            allowDirtyUpdates = false;
         }
 
 
@@ -191,19 +197,22 @@ namespace GoogleAuthClone
 
         private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
         {
+            mySettings.AlwaysOnTop = this.TopMost;
+            mySettings.FormLocation = this.Location;
+
             if (!exitImmediately && e.CloseReason != CloseReason.UserClosing)
             {
-                if (accountsDirty) 
+                if (accountsDirty && !allowDirtyUpdates) 
                     SaveSettings();
                 mySettings.SaveAppSettings();
-                return;
+                return; // do not cancel, just let it happen
             }
             else if (exitImmediately)
             {
-                return;
+                return; // do not cancel, just let it happen
             }
 
-            if (accountsDirty)
+            if (accountsDirty && !allowDirtyUpdates)
             {
                 DialogResult ret = MessageBox.Show(
                   this, "Do you want to saves changes before exiting the program?\r\n\r\n" +
@@ -215,8 +224,6 @@ namespace GoogleAuthClone
                 else if (ret == DialogResult.Cancel)
                     e.Cancel = true;
             }
-            mySettings.AlwaysOnTop = this.TopMost;
-            mySettings.FormLocation = this.Location;
             mySettings.SaveAppSettings();
         }
 
@@ -226,7 +233,7 @@ namespace GoogleAuthClone
             //old way removed for brevity
             if (accounts.Count > 0)
             {
-                if (!AccountXMLPersistance11.PutEncryptedAccounts(null, accounts, appStore, true, out blobProblem))
+                if (!AccountXMLPersistance11.PutEncryptedAccounts(null, accounts, userPP, true, out blobProblem))
                     throw blobProblem;
                 accountsDirty = false;
             }
@@ -307,7 +314,8 @@ namespace GoogleAuthClone
                     accounts.Add(theNewAcc.Name, theNewAcc);
                     int newItem = lbAccounts.Items.Add(theNewAcc.Name);
                     lbAccounts.ClearSelected();
-                    accountsDirty = true;
+                    if (!allowDirtyUpdates)
+                        accountsDirty = true;
                 }
             }
             catch (Exception ex)
@@ -354,7 +362,8 @@ namespace GoogleAuthClone
                     accounts.Clear();
                     accounts = updatedAccounts;
                     lbAccounts.ClearSelected();
-                    accountsDirty = true;
+                    if (!allowDirtyUpdates)
+                        accountsDirty = true;
                 }
             }
             this.Enabled = true;
@@ -413,7 +422,7 @@ namespace GoogleAuthClone
         private void menuFileChangePassphrase_Click(object sender, EventArgs e)
         {
             //rely on Change to challange the user for the old passphrase and then save the acccounts using the new passphrase
-            appStore.Change(ref accounts, this);
+            userPP.Change(ref accounts, this);
         }
 
         private void menuPinBarcode_Click(object sender, EventArgs e)
@@ -445,7 +454,9 @@ namespace GoogleAuthClone
             }
             else if (readProblem != null)
             {
-
+                MessageBox.Show("Sorry, something went wrong looking for a legacy Accounts.dat file in the program directory.\r\n" +
+                    readProblem.Message);
+                return;
             }
             
             Dictionary<string, TOTPAccount> tempAccounts = new Dictionary<string, TOTPAccount>();
@@ -723,7 +734,7 @@ namespace GoogleAuthClone
                 {
                     mySettings.DefaultSaveDirectory = Path.GetFullPath(dlgSaveBackup.FileName);
                     Exception fileProblem = null;
-                    if (AccountXMLPersistance11.PutEncryptedAccounts(dlgSaveBackup.FileName, accounts, appStore, true, out fileProblem))
+                    if (AccountXMLPersistance11.PutEncryptedAccounts(dlgSaveBackup.FileName, accounts, userPP, true, out fileProblem))
                     {
                         MessageBox.Show(this, "Ok, all done. Remember the passphrase for this file!  Seriously...");
                     }

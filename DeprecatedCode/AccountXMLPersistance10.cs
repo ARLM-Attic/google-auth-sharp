@@ -7,7 +7,7 @@ using System.Reflection;
 using System.IO;
 using System.Windows.Forms;
 
-namespace GoogleAuthClone
+namespace GoogleAuthClone.Deprecated
 {
     [Obsolete("Depricated in favor of a more secure implementation.  This is kept ONLY for account recovery.")]
     public class AccountXMLPersistance10

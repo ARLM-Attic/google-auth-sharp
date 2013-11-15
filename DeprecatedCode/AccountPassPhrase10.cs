@@ -7,7 +7,7 @@ using System.Windows.Forms;
 using SSC = System.Security.Cryptography;
 using GoogleAuthClone.Forms;
 
-namespace GoogleAuthClone
+namespace GoogleAuthClone.Deprecated
 {
     [Obsolete("Depricated in favor of a more secure implementation.  This is kept ONLY for account recovery.")]
     public class AccountPassPhrase10
