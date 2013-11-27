@@ -88,7 +88,8 @@ namespace GoogleAuthClone
                     Path.GetFileName(theAssembly), "");
             if (mySettings.LoadAppSettings())
             {
-                this.Location = mySettings.FormLocation;
+                if (mySettings.FormLocation.X >= 0 && mySettings.FormLocation.Y >=0)
+                    this.Location = mySettings.FormLocation; //the if statement fixes the -32000,-32000 issue
                 dlgLoadXML.InitialDirectory = mySettings.DefaultLoadDirectory;
                 dlgSaveBackup.InitialDirectory = mySettings.DefaultSaveDirectory;
                 this.TopMost = mySettings.AlwaysOnTop;

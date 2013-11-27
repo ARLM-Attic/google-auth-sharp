@@ -75,6 +75,12 @@ namespace GoogleAuthClone
         // if any of the settings have changed.
         public bool SaveAppSettings()
         {
+            //sanity check
+            if (this.FormLocation.X < 0)
+                this.FormLocation = new System.Drawing.Point(0, this.FormLocation.Y);
+            if (this.FormLocation.Y < 0)
+                this.FormLocation = new System.Drawing.Point(this.FormLocation.X, 0);
+
             Assembly theAssembly = Assembly.GetAssembly(typeof(AccountXMLPersistance11));
             string theAssemblyPath = theAssembly.CodeBase;
             string thePath = Path.GetFullPath(
@@ -177,6 +183,11 @@ namespace GoogleAuthClone
                 m_defaultLoadDirectory = thePath;
                 this.appSettingsChanged = true;
             }
+            //sanity checks
+            if (this.FormLocation.X < 0)
+                this.FormLocation = new System.Drawing.Point(0, this.FormLocation.Y);
+            if (this.FormLocation.Y < 0)
+                this.FormLocation = new System.Drawing.Point(this.FormLocation.X, 0);
 
             return fileExists;
         }
