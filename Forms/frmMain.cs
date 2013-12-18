@@ -199,7 +199,8 @@ namespace GoogleAuthClone
         private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
         {
             mySettings.AlwaysOnTop = this.TopMost;
-            mySettings.FormLocation = this.Location;
+            if (this.Location.X > 0 && this.Location.Y > 0)
+                mySettings.FormLocation = this.Location;
 
             if (!exitImmediately && e.CloseReason != CloseReason.UserClosing)
             {
@@ -243,7 +244,13 @@ namespace GoogleAuthClone
         private void frmMain_Load(object sender, EventArgs e)
         {
             timeOutFullWidth = pbTimeOut.Width; // grab the full width at startup and use this as the reference
-            
+            this.Move += new EventHandler(frmMain_Move);   
+        }
+
+        void frmMain_Move(object sender, EventArgs e)
+        {
+            if (this.Location.X > 0 && this.Location.Y >0)
+                mySettings.FormLocation = this.Location;
         }
 
         private void KickUser(string additionalMessages = null)

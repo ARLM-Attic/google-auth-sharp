@@ -39,6 +39,7 @@
             this.lblCopyClipboard = new System.Windows.Forms.Label();
             this.menuMain = new System.Windows.Forms.MenuStrip();
             this.menuFile = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuFileSave = new System.Windows.Forms.ToolStripMenuItem();
             this.menuFileAdd = new System.Windows.Forms.ToolStripMenuItem();
             this.menuFileEdit = new System.Windows.Forms.ToolStripMenuItem();
             this.menuFileDelete = new System.Windows.Forms.ToolStripMenuItem();
@@ -60,7 +61,6 @@
             this.menuWindowAlwaysOnTop = new System.Windows.Forms.ToolStripMenuItem();
             this.dlgSaveBackup = new System.Windows.Forms.SaveFileDialog();
             this.dlgLoadXML = new System.Windows.Forms.OpenFileDialog();
-            this.menuFileSave = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.pbTimeOut)).BeginInit();
             this.menuMain.SuspendLayout();
             this.SuspendLayout();
@@ -79,7 +79,7 @@
             this.lbAccounts.Name = "lbAccounts";
             this.lbAccounts.ScrollAlwaysVisible = true;
             this.lbAccounts.Size = new System.Drawing.Size(361, 116);
-            this.lbAccounts.TabIndex = 7;
+            this.lbAccounts.TabIndex = 1;
             this.lbAccounts.SelectedIndexChanged += new System.EventHandler(this.lbAccounts_SelectedIndexChanged);
             // 
             // lblGetCode
@@ -90,7 +90,7 @@
             this.lblGetCode.Location = new System.Drawing.Point(13, 210);
             this.lblGetCode.Name = "lblGetCode";
             this.lblGetCode.Size = new System.Drawing.Size(361, 20);
-            this.lblGetCode.TabIndex = 8;
+            this.lblGetCode.TabIndex = 3;
             this.lblGetCode.Text = "CLICK *HERE* FOR A QR BARCODE FOR YOUR PHONE";
             this.lblGetCode.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.lblGetCode.Click += new System.EventHandler(this.lblGetCode_Click);
@@ -126,7 +126,7 @@
             this.txtCode.Name = "txtCode";
             this.txtCode.ReadOnly = true;
             this.txtCode.Size = new System.Drawing.Size(267, 49);
-            this.txtCode.TabIndex = 11;
+            this.txtCode.TabIndex = 2;
             this.txtCode.Text = "==========";
             this.txtCode.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.txtCode.WordWrap = false;
@@ -139,7 +139,7 @@
             this.lblCopyClipboard.Location = new System.Drawing.Point(13, 230);
             this.lblCopyClipboard.Name = "lblCopyClipboard";
             this.lblCopyClipboard.Size = new System.Drawing.Size(361, 20);
-            this.lblCopyClipboard.TabIndex = 12;
+            this.lblCopyClipboard.TabIndex = 4;
             this.lblCopyClipboard.Text = "DOUBLE-CLICK THE CODE TO COPY IT TO THE CLIPBOARD";
             this.lblCopyClipboard.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
@@ -153,7 +153,7 @@
             this.menuMain.Name = "menuMain";
             this.menuMain.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
             this.menuMain.Size = new System.Drawing.Size(386, 24);
-            this.menuMain.TabIndex = 13;
+            this.menuMain.TabIndex = 0;
             // 
             // menuFile
             // 
@@ -172,6 +172,13 @@
             this.menuFile.Name = "menuFile";
             this.menuFile.Size = new System.Drawing.Size(37, 20);
             this.menuFile.Text = "&File";
+            // 
+            // menuFileSave
+            // 
+            this.menuFileSave.Name = "menuFileSave";
+            this.menuFileSave.Size = new System.Drawing.Size(285, 22);
+            this.menuFileSave.Text = "&Save Accounts";
+            this.menuFileSave.Click += new System.EventHandler(this.menuFileSave_Click);
             // 
             // menuFileAdd
             // 
@@ -336,13 +343,6 @@
             this.dlgLoadXML.Filter = "XML Files|*.xml|Text Files|*.txt|All Files|*.*";
             this.dlgLoadXML.RestoreDirectory = true;
             this.dlgLoadXML.Title = "Import Accounts";
-            // 
-            // menuFileSave
-            // 
-            this.menuFileSave.Name = "menuFileSave";
-            this.menuFileSave.Size = new System.Drawing.Size(285, 22);
-            this.menuFileSave.Text = "&Save Accounts";
-            this.menuFileSave.Click += new System.EventHandler(this.menuFileSave_Click);
             // 
             // frmMain
             // 

@@ -9,7 +9,7 @@ namespace GoogleAuthClone
     public class TOTPAccount
     {
         private static Guid nameHashSalt = new Guid("83C3DFDC-8A16-C1B2-9D6A-58421FD883A5");
-
+        //"otpauth://totp/Microsoft:dsparks@colossusconsulting.com?secret=XEX4J3VYKZG5SVP5&issuer=Microsoft"
         public enum TOTPAlgorithm : byte
         {
             SHA1 = 0,
@@ -69,6 +69,9 @@ namespace GoogleAuthClone
         private string _encodedSecret = string.Empty;
         public string EncodedSecret { get { return _encodedSecret; } }
 
+        private string _issuer = string.Empty;
+        public string Issuer { get { return _issuer; } set { _issuer = value; } }
+
         public static string PreviewNameHash(string name)
         {
             string result = string.Empty;
@@ -114,6 +117,7 @@ namespace GoogleAuthClone
             _name = string.Empty;
             _nameHash = string.Empty;
             _encodedSecret = string.Empty;
+            _issuer = string.Empty;
         }
 
         public TOTPAccount Clone()
@@ -143,6 +147,8 @@ namespace GoogleAuthClone
                 sb.Append("&digits=" + this.Digits.ToString()); //OPTIONAL
             if (verbose || this.Period != 30)
                 sb.Append("&period=" + this.Period.ToString()); //OPTIONAL
+            if (verbose || !string.IsNullOrWhiteSpace(this.Issuer)) // OPTIONAL
+                sb.Append("&issuer=" + this.Issuer); //OPTIONAL
             return sb.ToString();
         }
 
@@ -159,6 +165,8 @@ namespace GoogleAuthClone
                 xeAccount.Add(new XElement("digits", this.Digits));
             if (this.Period != 30)
                 xeAccount.Add(new XElement("period", this.Period));
+            if (!string.IsNullOrWhiteSpace(this.Issuer))
+                xeAccount.Add(new XElement("issuer", this.Issuer));
             return xeAccount;
         }
 
@@ -190,6 +198,7 @@ namespace GoogleAuthClone
                             break;
                         case "digits": tempAcc.Digits = byte.Parse(pieces[1]); break;
                         case "period": tempAcc.Period = int.Parse(pieces[1]); break;
+                        case "issuer": tempAcc.Issuer = pieces[1]; break;
                         case "algorithm":
                             if (Enum.IsDefined(typeof(TOTPAlgorithm), pieces[1].ToUpperInvariant()))
                             {
@@ -232,6 +241,8 @@ namespace GoogleAuthClone
                     tryThis += "&period=" + source.Element("period").Value;
                 if (source.Element("digits") != null)
                     tryThis += "&digits=" + source.Element("digits").Value;
+                if (source.Element("issuer") != null)
+                    tryThis += "&issuer=" + source.Element("issuer").Value;
                 return FromUriString(tryThis);
             }
             catch

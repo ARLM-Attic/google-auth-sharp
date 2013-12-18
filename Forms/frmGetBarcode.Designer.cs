@@ -45,10 +45,10 @@
             this.btnCancel.BackColor = System.Drawing.Color.Red;
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.btnCancel.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnCancel.Location = new System.Drawing.Point(307, 361);
+            this.btnCancel.Location = new System.Drawing.Point(306, 381);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(144, 30);
-            this.btnCancel.TabIndex = 11;
+            this.btnCancel.TabIndex = 4;
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = false;
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
@@ -57,10 +57,10 @@
             // 
             this.btnOk.BackColor = System.Drawing.Color.Lime;
             this.btnOk.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnOk.Location = new System.Drawing.Point(134, 361);
+            this.btnOk.Location = new System.Drawing.Point(133, 381);
             this.btnOk.Name = "btnOk";
             this.btnOk.Size = new System.Drawing.Size(151, 30);
-            this.btnOk.TabIndex = 10;
+            this.btnOk.TabIndex = 3;
             this.btnOk.Text = "Ok";
             this.btnOk.UseVisualStyleBackColor = false;
             this.btnOk.Click += new System.EventHandler(this.btnOk_Click);
@@ -81,7 +81,7 @@
             this.txtFilename.Name = "txtFilename";
             this.txtFilename.ReadOnly = true;
             this.txtFilename.Size = new System.Drawing.Size(532, 20);
-            this.txtFilename.TabIndex = 13;
+            this.txtFilename.TabIndex = 0;
             // 
             // ofdFile
             // 
@@ -93,7 +93,7 @@
             this.butBrowse.Location = new System.Drawing.Point(550, 284);
             this.butBrowse.Name = "butBrowse";
             this.butBrowse.Size = new System.Drawing.Size(33, 23);
-            this.butBrowse.TabIndex = 14;
+            this.butBrowse.TabIndex = 1;
             this.butBrowse.Text = "...";
             this.butBrowse.UseVisualStyleBackColor = true;
             this.butBrowse.Click += new System.EventHandler(this.butBrowse_Click);
@@ -104,26 +104,27 @@
             this.lblResult.ForeColor = System.Drawing.Color.White;
             this.lblResult.Location = new System.Drawing.Point(12, 309);
             this.lblResult.Name = "lblResult";
-            this.lblResult.Size = new System.Drawing.Size(571, 22);
-            this.lblResult.TabIndex = 15;
+            this.lblResult.Size = new System.Drawing.Size(571, 34);
+            this.lblResult.TabIndex = 2;
             // 
             // lblNote
             // 
-            this.lblNote.AutoSize = true;
             this.lblNote.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblNote.ForeColor = System.Drawing.Color.White;
-            this.lblNote.Location = new System.Drawing.Point(103, 343);
+            this.lblNote.Location = new System.Drawing.Point(94, 343);
             this.lblNote.Name = "lblNote";
-            this.lblNote.Size = new System.Drawing.Size(385, 15);
+            this.lblNote.Size = new System.Drawing.Size(424, 35);
             this.lblNote.TabIndex = 17;
-            this.lblNote.Text = "Note:  File must contain NO MORE THAN ONE (1) BARCODE!";
+            this.lblNote.Text = "Note:  File must contain NO MORE THAN ONE (1) BARCODE and have little or no white" +
+    " space on the top and left edges!";
+            this.lblNote.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
             // frmGetBarcode
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Navy;
-            this.ClientSize = new System.Drawing.Size(593, 399);
+            this.ClientSize = new System.Drawing.Size(593, 423);
             this.Controls.Add(this.lblNote);
             this.Controls.Add(this.lblResult);
             this.Controls.Add(this.butBrowse);

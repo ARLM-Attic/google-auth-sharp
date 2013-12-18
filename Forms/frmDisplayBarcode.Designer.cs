@@ -33,6 +33,7 @@
             this.lblNote = new System.Windows.Forms.Label();
             this.lblKey = new System.Windows.Forms.Label();
             this.lblClickReminder = new System.Windows.Forms.Label();
+            this.btnClose = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pbxBarcode)).BeginInit();
             this.SuspendLayout();
             // 
@@ -56,7 +57,7 @@
             this.lblNote.Location = new System.Drawing.Point(12, 228);
             this.lblNote.Name = "lblNote";
             this.lblNote.Size = new System.Drawing.Size(354, 145);
-            this.lblNote.TabIndex = 1;
+            this.lblNote.TabIndex = 3;
             this.lblNote.Text = "Note:";
             this.lblNote.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.lblNote.Click += new System.EventHandler(this.lblNote_Click);
@@ -67,7 +68,7 @@
             this.lblKey.Location = new System.Drawing.Point(84, 195);
             this.lblKey.Name = "lblKey";
             this.lblKey.Size = new System.Drawing.Size(216, 33);
-            this.lblKey.TabIndex = 2;
+            this.lblKey.TabIndex = 1;
             this.lblKey.Text = "xxxxxxxxxxxxxxxx";
             this.lblKey.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             this.lblKey.Click += new System.EventHandler(this.lblKey_Click);
@@ -79,17 +80,32 @@
             this.lblClickReminder.Location = new System.Drawing.Point(81, 379);
             this.lblClickReminder.Name = "lblClickReminder";
             this.lblClickReminder.Size = new System.Drawing.Size(219, 16);
-            this.lblClickReminder.TabIndex = 3;
+            this.lblClickReminder.TabIndex = 2;
             this.lblClickReminder.Text = "Click anywhere to close the window.";
             this.lblClickReminder.Click += new System.EventHandler(this.lblClickReminder_Click);
             // 
+            // btnClose
+            // 
+            this.btnClose.BackColor = System.Drawing.Color.Red;
+            this.btnClose.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.btnClose.Location = new System.Drawing.Point(355, 7);
+            this.btnClose.Name = "btnClose";
+            this.btnClose.Size = new System.Drawing.Size(20, 20);
+            this.btnClose.TabIndex = 0;
+            this.btnClose.Text = "X";
+            this.btnClose.UseVisualStyleBackColor = false;
+            this.btnClose.Click += new System.EventHandler(this.btnClose_Click);
+            // 
             // frmDisplayBarcode
             // 
+            this.AcceptButton = this.btnClose;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Gray;
+            this.CancelButton = this.btnClose;
             this.ClientSize = new System.Drawing.Size(378, 404);
             this.ControlBox = false;
+            this.Controls.Add(this.btnClose);
             this.Controls.Add(this.lblClickReminder);
             this.Controls.Add(this.lblKey);
             this.Controls.Add(this.lblNote);
@@ -117,5 +133,6 @@
         private System.Windows.Forms.Label lblNote;
         private System.Windows.Forms.Label lblKey;
         private System.Windows.Forms.Label lblClickReminder;
+        private System.Windows.Forms.Button btnClose;
     }
 }

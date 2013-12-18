@@ -46,13 +46,15 @@
             this.butBarcode = new System.Windows.Forms.Button();
             this.lblNameChecksum = new System.Windows.Forms.Label();
             this.lblNameChecksumValue = new System.Windows.Forms.Label();
+            this.lblIssuer = new System.Windows.Forms.Label();
+            this.txtIssuer = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // btnOk
             // 
             this.btnOk.BackColor = System.Drawing.Color.Lime;
             this.btnOk.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnOk.Location = new System.Drawing.Point(12, 262);
+            this.btnOk.Location = new System.Drawing.Point(12, 303);
             this.btnOk.Name = "btnOk";
             this.btnOk.Size = new System.Drawing.Size(151, 31);
             this.btnOk.TabIndex = 8;
@@ -65,7 +67,7 @@
             this.btnCancel.BackColor = System.Drawing.Color.Red;
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.btnCancel.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnCancel.Location = new System.Drawing.Point(169, 262);
+            this.btnCancel.Location = new System.Drawing.Point(169, 303);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(144, 31);
             this.btnCancel.TabIndex = 9;
@@ -229,17 +231,17 @@
             this.txtPeriod.Location = new System.Drawing.Point(12, 225);
             this.txtPeriod.Name = "txtPeriod";
             this.txtPeriod.Size = new System.Drawing.Size(72, 22);
-            this.txtPeriod.TabIndex = 7;
+            this.txtPeriod.TabIndex = 6;
             this.txtPeriod.Text = "30";
             // 
             // butBarcode
             // 
             this.butBarcode.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(192)))), ((int)(((byte)(192)))));
             this.butBarcode.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.butBarcode.Location = new System.Drawing.Point(12, 299);
+            this.butBarcode.Location = new System.Drawing.Point(12, 340);
             this.butBarcode.Name = "butBarcode";
             this.butBarcode.Size = new System.Drawing.Size(301, 29);
-            this.butBarcode.TabIndex = 16;
+            this.butBarcode.TabIndex = 10;
             this.butBarcode.Text = "Use Barcode Image";
             this.butBarcode.UseVisualStyleBackColor = false;
             this.butBarcode.Click += new System.EventHandler(this.butBarcode_Click);
@@ -265,6 +267,26 @@
             this.lblNameChecksumValue.TabIndex = 18;
             this.lblNameChecksumValue.Text = "[type a name first]";
             // 
+            // lblIssuer
+            // 
+            this.lblIssuer.AutoSize = true;
+            this.lblIssuer.BackColor = System.Drawing.Color.Transparent;
+            this.lblIssuer.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblIssuer.ForeColor = System.Drawing.Color.White;
+            this.lblIssuer.Location = new System.Drawing.Point(9, 256);
+            this.lblIssuer.Name = "lblIssuer";
+            this.lblIssuer.Size = new System.Drawing.Size(162, 16);
+            this.lblIssuer.TabIndex = 20;
+            this.lblIssuer.Text = "Who issued this thing?";
+            // 
+            // txtIssuer
+            // 
+            this.txtIssuer.Font = new System.Drawing.Font("Courier New", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtIssuer.Location = new System.Drawing.Point(12, 275);
+            this.txtIssuer.Name = "txtIssuer";
+            this.txtIssuer.Size = new System.Drawing.Size(301, 22);
+            this.txtIssuer.TabIndex = 7;
+            // 
             // frmTOTPAccount
             // 
             this.AcceptButton = this.btnOk;
@@ -272,8 +294,10 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Navy;
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(325, 342);
+            this.ClientSize = new System.Drawing.Size(325, 386);
             this.ControlBox = false;
+            this.Controls.Add(this.lblIssuer);
+            this.Controls.Add(this.txtIssuer);
             this.Controls.Add(this.lblNameChecksumValue);
             this.Controls.Add(this.lblNameChecksum);
             this.Controls.Add(this.butBarcode);
@@ -325,5 +349,7 @@
         private System.Windows.Forms.Button butBarcode;
         private System.Windows.Forms.Label lblNameChecksum;
         private System.Windows.Forms.Label lblNameChecksumValue;
+        private System.Windows.Forms.Label lblIssuer;
+        private System.Windows.Forms.TextBox txtIssuer;
     }
 }

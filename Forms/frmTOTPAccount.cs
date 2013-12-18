@@ -37,6 +37,7 @@ namespace GoogleAuthClone
                 txtName.Text = theAccount.Name;
                 txtPeriod.Text = theAccount.Period.ToString();
                 txtSecret.Text = theAccount.EncodedSecret;
+                txtIssuer.Text = theAccount.Issuer;
                 switch (theAccount.Algorithm)
                 {
                     case TOTPAccount.TOTPAlgorithm.SHA1: cbAlgorithm.SelectedIndex = 0; break;
@@ -101,7 +102,6 @@ namespace GoogleAuthClone
                 MessageBox.Show("EXCEPTION ON VALIDATE INPUT:" + ex.Message + ex.StackTrace);
                 return;
             }
-
             theAccount.Name = this.txtName.Text;
             theAccount.SetEncodedSecret(tempSecret);
             switch (cbAlgorithm.Text)
@@ -114,7 +114,7 @@ namespace GoogleAuthClone
             int tempByte = byte.Parse(cbDigits.Text);
             theAccount.Digits = (byte)tempByte;
             theAccount.Period = tempPeriod;
-
+            theAccount.Issuer = txtIssuer.Text;
             this.DialogResult = DialogResult.OK;
             this.Tag = theAccount;
             this.Close();
