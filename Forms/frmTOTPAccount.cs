@@ -93,7 +93,7 @@ namespace GoogleAuthClone
             try
             {
                 if (rbB32.Checked)
-                    tempSecret = Base32Encoder.FromBase32String(txtSecret.Text);
+                    tempSecret = Base32EncoderAlt.FromBase32String(txtSecret.Text);
                 else if (rbB64.Checked)
                     tempSecret = Convert.FromBase64String(txtSecret.Text);
             }

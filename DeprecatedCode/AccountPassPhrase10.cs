@@ -304,7 +304,7 @@ namespace GoogleAuthClone.Deprecated
             // this noise is to randomize the contents of the file during encryption so that each block is unique.
             // since we'll be using a CBC mode, the first block and the IV are critical to be random.
             // the leading "n" is required because elements cannot have names starting with numbers
-            XElement payload = new XElement("n" + Base32Encoder.ToBase32String(buffer).Replace("=", "") + "_noise");
+            XElement payload = new XElement("n" + Base32EncoderAlt.ToBase32String(buffer).Replace("=", "") + "_noise");
             myRNG.GetBytes(iv); //the IV will be random, and will be folded into the key, which is provided by the user
             useableKey = MakeSessionKey(iv);
             //now we're ready to do this

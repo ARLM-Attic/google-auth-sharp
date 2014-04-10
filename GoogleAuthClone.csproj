@@ -88,6 +88,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Base32EncoderAlt.cs" />
     <Compile Include="DeprecatedCode\AccountPassPhrase10.cs" />
     <Compile Include="DeprecatedCode\AccountXMLPersistance10.cs" />
     <Compile Include="AccountPassPhrase11.cs" />

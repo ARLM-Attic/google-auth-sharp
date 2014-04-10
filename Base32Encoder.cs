@@ -3,13 +3,16 @@ using System.Text;
 
 namespace System
 {
+    //REMOVED IN FAVOR OF ALTERNATE DECODER WHICH IS MORE FORGIVING OF INCOMPLETE BASE32 STRINGS!!!!
+    //APRIL 2014
+    /*
     public static class Base32Encoder
     {
         //THIS CODE TAKEN AND THEN AUGMENTED FROM:
         //http://www.codeproject.com/KB/recipes/Base32Encoding.aspx
         //My modifcations were to make this a static class that takes no constructors or customizations.
 
-        private const string ENCODING_TABLE = "abcdefghijklmnopqrstuvwxyz234567";
+        private const string ENCODING_TABLE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"; //"abcdefghijklmnopqrstuvwxyz234567";
         private const char PADDING = '=';
 
         public static string ToBase32String(byte[] input)
@@ -94,7 +97,7 @@ namespace System
         public static byte[] FromBase32String(string data)
         {
             //sanity check, do lower case stuff only
-            data = data.ToLower();
+            data = data.ToUpper();
 
             var outStream = new List<Byte>();
             byte[] dTable = InitialiseDecodingTable();
@@ -234,4 +237,5 @@ namespace System
             return dt;
         }
     }
+     */
 }

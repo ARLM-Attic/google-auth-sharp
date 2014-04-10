@@ -91,7 +91,7 @@ namespace GoogleAuthClone
                 mySha.Clear();
             }
             mySha = new SSC.HMACSHA256(nameHashSalt.ToByteArray());
-            result = Base32Encoder.ToBase32String(mySha.ComputeHash(myEncoder.GetBytes(name))).Substring(0, 20);
+            result = Base32EncoderAlt.ToBase32String(mySha.ComputeHash(myEncoder.GetBytes(name))).Substring(0, 20);
             return result;
         }
 
@@ -102,14 +102,14 @@ namespace GoogleAuthClone
 
         public void SetEncodedSecret(byte[] rawSecret)
         {
-            _encodedSecret = Base32Encoder.ToBase32String(rawSecret);
+            _encodedSecret = Base32EncoderAlt.ToBase32String(rawSecret);
         }
 
         public byte[] GetSecret()
         {
             if (string.IsNullOrWhiteSpace(EncodedSecret))
                 return null;
-            return Base32Encoder.FromBase32String(EncodedSecret);
+            return Base32EncoderAlt.FromBase32String(EncodedSecret);
         }
 
         public void Clear()
@@ -194,7 +194,7 @@ namespace GoogleAuthClone
                     {
                         case "secret": 
                             //Bug Fix:  make sure secret is lower case
-                            tempSecret = Base32Encoder.FromBase32String(pieces[1].ToLower()); 
+                            tempSecret = Base32EncoderAlt.FromBase32String(pieces[1].ToLower()); 
                             break;
                         case "digits": tempAcc.Digits = byte.Parse(pieces[1]); break;
                         case "period": tempAcc.Period = int.Parse(pieces[1]); break;
