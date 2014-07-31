@@ -25,7 +25,7 @@ namespace GoogleAuthClone
             if (someAccount != null)
                 theAccount = someAccount.Clone();
             else
-                theAccount = new TOTPAccount();
+                theAccount = null; //new TOTPAccount(); empty constructor no longer allowed
             //theLocalPass = thePass;
             InitializeComponent();
         }
@@ -34,26 +34,38 @@ namespace GoogleAuthClone
         {
             try
             {
-                txtName.Text = theAccount.Name;
-                txtPeriod.Text = theAccount.Period.ToString();
-                txtSecret.Text = theAccount.EncodedSecret;
-                txtIssuer.Text = theAccount.Issuer;
-                switch (theAccount.Algorithm)
+                if (theAccount == null)
                 {
-                    case TOTPAccount.TOTPAlgorithm.SHA1: cbAlgorithm.SelectedIndex = 0; break;
-                    case TOTPAccount.TOTPAlgorithm.SHA256: cbAlgorithm.SelectedIndex = 1; break;
-                    case TOTPAccount.TOTPAlgorithm.SHA512: cbAlgorithm.SelectedIndex = 2; break;
-                    case TOTPAccount.TOTPAlgorithm.MD5: cbAlgorithm.SelectedIndex = 3; break;
-                    default: cbAlgorithm.SelectedIndex = 0; break;
+                    txtName.Text = "";
+                    txtPeriod.Text = "30";
+                    txtSecret.Text = "";
+                    txtIssuer.Text = "";
+                    cbAlgorithm.SelectedIndex = 0;
+                    cbDigits.SelectedIndex = 0;
                 }
-                switch (theAccount.Digits)
+                else
                 {
-                    case 6: cbDigits.SelectedIndex = 0; break;
-                    case 7: cbDigits.SelectedIndex = 1; break;
-                    case 8: cbDigits.SelectedIndex = 2; break;
-                    case 9: cbDigits.SelectedIndex = 3; break;
-                    case 10: cbDigits.SelectedIndex = 4; break;
-                    default: cbDigits.SelectedIndex = 0; break;
+                    txtName.Text = theAccount.Name;
+                    txtPeriod.Text = theAccount.Period.ToString();
+                    txtSecret.Text = theAccount.EncodedSecret;
+                    txtIssuer.Text = theAccount.Issuer;
+                    switch (theAccount.Algorithm)
+                    {
+                        case TOTPAccount.TOTPAlgorithm.SHA1: cbAlgorithm.SelectedIndex = 0; break;
+                        case TOTPAccount.TOTPAlgorithm.SHA256: cbAlgorithm.SelectedIndex = 1; break;
+                        case TOTPAccount.TOTPAlgorithm.SHA512: cbAlgorithm.SelectedIndex = 2; break;
+                        case TOTPAccount.TOTPAlgorithm.MD5: cbAlgorithm.SelectedIndex = 3; break;
+                        default: cbAlgorithm.SelectedIndex = 0; break;
+                    }
+                    switch (theAccount.Digits)
+                    {
+                        case 6: cbDigits.SelectedIndex = 0; break;
+                        case 7: cbDigits.SelectedIndex = 1; break;
+                        case 8: cbDigits.SelectedIndex = 2; break;
+                        case 9: cbDigits.SelectedIndex = 3; break;
+                        case 10: cbDigits.SelectedIndex = 4; break;
+                        default: cbDigits.SelectedIndex = 0; break;
+                    }
                 }
             }
             catch (Exception ex)
@@ -99,22 +111,33 @@ namespace GoogleAuthClone
             }
             catch (Exception ex)
             {
-                MessageBox.Show("EXCEPTION ON VALIDATE INPUT:" + ex.Message + ex.StackTrace);
+                MessageBox.Show("EXCEPTION ON VALIDATE INPUT:" + ex.Message);// + ex.StackTrace);
                 return;
             }
-            theAccount.Name = this.txtName.Text;
-            theAccount.SetEncodedSecret(tempSecret);
+
+            string tempName = this.txtName.Text;
+            TOTPAccount.TOTPAlgorithm tempAlgorithm = TOTPAccount.TOTPAlgorithm.SHA1;
             switch (cbAlgorithm.Text)
             {
-                case "SHA1": theAccount.Algorithm = TOTPAccount.TOTPAlgorithm.SHA1; break;
-                case "SHA256": theAccount.Algorithm = TOTPAccount.TOTPAlgorithm.SHA256; break;
-                case "SHA512": theAccount.Algorithm = TOTPAccount.TOTPAlgorithm.SHA512; break;
-                case "MD5": theAccount.Algorithm = TOTPAccount.TOTPAlgorithm.MD5; break;
+                case "SHA1": tempAlgorithm = TOTPAccount.TOTPAlgorithm.SHA1; break;
+                case "SHA256": tempAlgorithm = TOTPAccount.TOTPAlgorithm.SHA256; break;
+                case "SHA512": tempAlgorithm = TOTPAccount.TOTPAlgorithm.SHA512; break;
+                case "MD5": tempAlgorithm = TOTPAccount.TOTPAlgorithm.MD5; break;
             }
             int tempByte = byte.Parse(cbDigits.Text);
-            theAccount.Digits = (byte)tempByte;
-            theAccount.Period = tempPeriod;
-            theAccount.Issuer = txtIssuer.Text;
+            byte tempDigits = (byte)tempByte;
+            string tempIssuer = txtIssuer.Text;
+            TOTPAccount theAccount = null;
+            try
+            {
+                theAccount = new TOTPAccount(tempName, tempSecret,
+                    tempPeriod, tempDigits, tempAlgorithm, tempIssuer);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("EXCEPTION ON VALIDATE INPUT:" + ex.Message);// + ex.StackTrace);
+                return;
+            }
             this.DialogResult = DialogResult.OK;
             this.Tag = theAccount;
             this.Close();
@@ -132,8 +155,6 @@ namespace GoogleAuthClone
                 if (ret == System.Windows.Forms.DialogResult.OK)
                 {
                     theAccount = myBarCode.Tag as TOTPAccount;
-                    if (theAccount == null)
-                        theAccount = new TOTPAccount();
                     frmTOTPAccount_Load(this, new EventArgs());
                 }
                 myBarCode.Dispose();

@@ -14,7 +14,8 @@ namespace GoogleAuthClone
         {
             if (string.IsNullOrEmpty(input))
             {
-                throw new ArgumentNullException("input");
+                return null;
+                //throw new ArgumentNullException("input");
             }
 
             input = input.TrimEnd('='); //remove padding characters
@@ -57,7 +58,8 @@ namespace GoogleAuthClone
         {
             if (input == null || input.Length == 0)
             {
-                throw new ArgumentNullException("input");
+                return null;
+                //throw new ArgumentNullException("input");
             }
 
             int charCount = (int)Math.Ceiling(input.Length / 5d) * 8;
@@ -115,7 +117,8 @@ namespace GoogleAuthClone
             {
                 return -1;
             }
-            throw new ArgumentException("Character is not a Base32 character.", "c");
+            throw new ArgumentException(
+                string.Format("Character detected that is not a Base32 character: {0} raw value {1}", c, value), "c");
         }
 
         private static char ValueToChar(byte b)

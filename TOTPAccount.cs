@@ -9,7 +9,24 @@ namespace GoogleAuthClone
     public class TOTPAccount
     {
         private static Guid nameHashSalt = new Guid("83C3DFDC-8A16-C1B2-9D6A-58421FD883A5");
-        //"otpauth://totp/Microsoft:dsparks@colossusconsulting.com?secret=XEX4J3VYKZG5SVP5&issuer=Microsoft"
+        //example with new 'issuer' query string
+        //"otpauth://totp/Microsoft:dsparks@previousjob.com?secret=OOPSXXXXXXX&issuer=Microsoft"
+        //OOPS!
+        //Kids, don't forget to delete increminating, personal, dangerous, or otherwise not-for-public-consumption
+        // comments BEFORE checking in your code... the above commment is now permanently part of the code-base,
+        // and USED to actually work on my account.  It doesn't anymore and I've changed my password since then,
+        // but this could have been REALLY bad!  #CBSCares
+
+        internal DateTime lastTimeCodeBegins = DateTime.MinValue;
+        internal DateTime lastTimeCodeEnds = DateTime.MinValue;
+        internal UInt64 lastTimeCodeCalculated = UInt64.MinValue;   //internal cache
+        internal string lastCodeCalculated = null;                  //internal cache
+
+        public DateTime CodeExpires
+        {
+            get { return lastTimeCodeEnds; }
+        }
+
         public enum TOTPAlgorithm : byte
         {
             SHA1 = 0,
@@ -18,35 +35,79 @@ namespace GoogleAuthClone
             MD5 = 3
         }
 
+        // July 31st, 2014
+        // All parameter "set" commands removed.  
+        // The only thing that can be set after object creation is the secret and the name.
+        public TOTPAccount(string Name, string Base32Secret, 
+            int Period = 30, Byte Digits = 6, TOTPAlgorithm Algorithm = TOTPAlgorithm.SHA1, string Issuer = "")
+        {
+            if (string.IsNullOrWhiteSpace(Name) || string.IsNullOrWhiteSpace(Base32Secret))
+            {
+                throw new InvalidOperationException("Name and Base32Secret are Not Optional, and must contain valid information!");
+            }
+
+            _algorithm = Algorithm;
+            _digits = Digits;
+            _period = Period;
+            _issuer = Issuer;
+            _name = Name;
+            _nameHash = PreviewNameHash(_name);
+            SetEncodedSecret(Base32Secret);
+        }
+
+        public TOTPAccount(string Name, byte[] Secret,
+            int Period = 30, Byte Digits = 6, TOTPAlgorithm Algorithm = TOTPAlgorithm.SHA1, string Issuer = "")
+        {
+            if (string.IsNullOrWhiteSpace(Name) || Secret == null || Secret.Length < 10)
+            {
+                throw new InvalidOperationException("Name and Secret are Not Optional, and must contain valid information (Secret must be at least 10 bytes)!");
+            }
+
+            _algorithm = Algorithm;
+            _digits = Digits;
+            _period = Period;
+            _issuer = Issuer;
+            _name = Name;
+            _nameHash = PreviewNameHash(_name);
+            SetEncodedSecret(Secret);
+        }
+
+
         private const string URIHeader = "otpauth://totp/";
 
         private int _period = 30;
         public int Period
         {
             get { return _period; }
-            set
+            /*set
             {
                 _period = Math.Abs(value) % 86400;
                 if (_period < 5)
                     _period = 5;
             }
+             */
         }
 
         private byte _digits = 6;
         public byte Digits
         {
             get { return _digits; }
-            set 
+            /*set 
             {
                 _digits = value;
                 if (value < 6)
                     _digits = 6;
                 if (value > 10)
                     _digits = 10;
-            }
+            }*/
         }
 
-        public TOTPAlgorithm Algorithm { get; set; }
+        private TOTPAlgorithm _algorithm = TOTPAlgorithm.SHA1;
+        public TOTPAlgorithm Algorithm 
+        {
+            get { return _algorithm; }
+            //set;
+        }
 
         private string _name = string.Empty;
         public string Name
@@ -70,7 +131,11 @@ namespace GoogleAuthClone
         public string EncodedSecret { get { return _encodedSecret; } }
 
         private string _issuer = string.Empty;
-        public string Issuer { get { return _issuer; } set { _issuer = value; } }
+        public string Issuer
+        { 
+            get { return _issuer; }
+            //set { _issuer = value; }
+        }
 
         public static string PreviewNameHash(string name)
         {
@@ -112,13 +177,15 @@ namespace GoogleAuthClone
             return Base32EncoderAlt.FromBase32String(EncodedSecret);
         }
 
-        public void Clear()
+        /*
+        public void Clear() // no longer needed if individual settings cannot be changed, just send to garbage collector
         {
             _name = string.Empty;
             _nameHash = string.Empty;
             _encodedSecret = string.Empty;
             _issuer = string.Empty;
         }
+        */
 
         public TOTPAccount Clone()
         {
@@ -131,7 +198,7 @@ namespace GoogleAuthClone
         }
 
         //example URI for ToUriString and FromUriString
-        //   otpauth://totp/some.email.address@gmail.com?secret=cbtu2gs6uesagw3p&digits=6&period=30
+        //   otpauth://totp/some.email.address@gmail.com?secret=cb222666uuuccw3p&issuer=Microsoft&digits=6&period=30
 
         public string ToUriString(bool verbose = false)
         {
@@ -178,13 +245,18 @@ namespace GoogleAuthClone
                 return null;
             if (!inString.Contains("?secret=") && !inString.Contains("&secret="))
                 return null;
-            TOTPAccount tempAcc = new TOTPAccount();
-            byte[] tempSecret = null;
+            //TOTPAccount tempAcc = new TOTPAccount();
+            string tempSecret = null;
+            string tempName = null;
+            int tempPeriod = 30;
+            string tempIssuer = null;
+            byte tempDigits = 6;
+            TOTPAlgorithm tempAlgorithm = TOTPAlgorithm.SHA1;
             try
             {
                 inString = inString.Replace(URIHeader, "");
-                tempAcc.Name = inString.Substring(0, inString.IndexOf("?"));
-                inString = inString.Replace(tempAcc.Name + '?', "");
+                tempName = inString.Substring(0, inString.IndexOf("?"));
+                inString = inString.Replace(tempName + '?', "");
 
                 string[] inParams = inString.Split(new char[] { '&' }, StringSplitOptions.RemoveEmptyEntries);
                 foreach (string thing in inParams)
@@ -194,15 +266,15 @@ namespace GoogleAuthClone
                     {
                         case "secret": 
                             //Bug Fix:  make sure secret is lower case
-                            tempSecret = Base32EncoderAlt.FromBase32String(pieces[1].ToLower()); 
+                            tempSecret = pieces[1].ToLower(); 
                             break;
-                        case "digits": tempAcc.Digits = byte.Parse(pieces[1]); break;
-                        case "period": tempAcc.Period = int.Parse(pieces[1]); break;
-                        case "issuer": tempAcc.Issuer = pieces[1]; break;
+                        case "digits": tempDigits = byte.Parse(pieces[1]); break;
+                        case "period": tempPeriod = int.Parse(pieces[1]); break;
+                        case "issuer": tempIssuer = pieces[1]; break;
                         case "algorithm":
                             if (Enum.IsDefined(typeof(TOTPAlgorithm), pieces[1].ToUpperInvariant()))
                             {
-                                tempAcc.Algorithm = (TOTPAlgorithm)Enum.Parse(
+                                tempAlgorithm = (TOTPAlgorithm)Enum.Parse(
                                    typeof(TOTPAlgorithm), pieces[1].ToUpperInvariant());
                             }
                             else
@@ -213,10 +285,11 @@ namespace GoogleAuthClone
                 //check for malformation or missing required information
                 if (tempSecret == null)
                     return null;
-                if (string.IsNullOrWhiteSpace(tempAcc.Name))
+                if (string.IsNullOrWhiteSpace(tempName))
                     return null;
-                
-                tempAcc.SetEncodedSecret(tempSecret);
+
+                TOTPAccount tempAcc = new TOTPAccount(tempName, tempSecret, 
+                    tempPeriod, tempDigits, tempAlgorithm, tempIssuer);
 
                 return tempAcc;
             }
@@ -252,7 +325,12 @@ namespace GoogleAuthClone
         }
 
         //ACTUAL CALCULATION METHODS
-     
+
+        public string ComputePIN()
+        {
+            return ComputePIN(DateTime.Now);
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -260,20 +338,31 @@ namespace GoogleAuthClone
         /// <returns></returns>
         public string ComputePIN(DateTime when)
         {
-            SSC.HMAC myAlg = null;
-            switch (Algorithm)
-            {
-                case TOTPAlgorithm.SHA1: myAlg = new SSC.HMACSHA1(this.GetSecret()); break;
-                case TOTPAlgorithm.SHA256: myAlg = new SSC.HMACSHA256(this.GetSecret()); break;
-                case TOTPAlgorithm.SHA512: myAlg = new SSC.HMACSHA512(this.GetSecret()); break;
-                case TOTPAlgorithm.MD5: myAlg = new SSC.HMACMD5(this.GetSecret()); break;
-            }        
+            //updated to cache the last code to ease updating displays
+            //load should spike when new time code is used, else should be low while using cached code
             UInt64 theInterval = GetTimeCode(when, Period);
-            byte[] theIntervalsBytes = BitConverter.GetBytes(theInterval);
-            Array.Reverse(theIntervalsBytes);
-            byte[] hashResult = myAlg.ComputeHash(theIntervalsBytes);
-            myAlg.Clear();
-            return ExtractDTB(hashResult, Digits);
+            if (theInterval == lastTimeCodeCalculated && !string.IsNullOrWhiteSpace(lastCodeCalculated))
+                return lastCodeCalculated;
+            else
+            {
+                lastTimeCodeCalculated = theInterval;
+                lastTimeCodeBegins = GetDateFromTimeCode(lastTimeCodeCalculated, Period);
+                lastTimeCodeEnds = GetDateFromTimeCode(lastTimeCodeCalculated, Period).AddSeconds(Period);
+                SSC.HMAC myAlg = null;
+                switch (Algorithm)
+                {
+                    case TOTPAlgorithm.SHA1: myAlg = new SSC.HMACSHA1(this.GetSecret()); break;
+                    case TOTPAlgorithm.SHA256: myAlg = new SSC.HMACSHA256(this.GetSecret()); break;
+                    case TOTPAlgorithm.SHA512: myAlg = new SSC.HMACSHA512(this.GetSecret()); break;
+                    case TOTPAlgorithm.MD5: myAlg = new SSC.HMACMD5(this.GetSecret()); break;
+                }
+                byte[] theIntervalsBytes = BitConverter.GetBytes(theInterval);
+                Array.Reverse(theIntervalsBytes);
+                byte[] hashResult = myAlg.ComputeHash(theIntervalsBytes);
+                myAlg.Clear();
+                lastCodeCalculated = ExtractDTB(hashResult, Digits); //cache it
+                return lastCodeCalculated;
+            }
         }
 
         /// <summary>
@@ -311,14 +400,36 @@ namespace GoogleAuthClone
             return epoch / (UInt64)(interval);
         }
 
-        public Single PercentIntervalElapsed(DateTime theDateTime)
+        internal static DateTime GetDateFromTimeCode(UInt64 DateCode, int Interval)
         {
-            long epoch = ((theDateTime.ToUniversalTime().Ticks - 621355968000000000) / 10000000);
-            long rem;
-            Math.DivRem(epoch, this.Period, out rem);
-            Single result = (Single)rem / (long)this.Period;
-            return result;
+            Int64 tempTicks = (Int64)((DateCode * (ulong)Interval) * 10000000);
+            return DateTime.MinValue.AddTicks(tempTicks + 621355968000000000).ToLocalTime();
         }
 
+        #region User Interface Helper Functions
+        public Single PercentIntervalElapsed()//(DateTime theDateTime)
+        {
+            TimeSpan elapsed = DateTime.Now - lastTimeCodeBegins;
+            return (Single)(elapsed.TotalMilliseconds / (Period * 1000));
+        }
+        
+        public Single PercentIntervalRemaining()//(DateTime theDateTime)
+        {
+            TimeSpan remaining = lastTimeCodeEnds - DateTime.Now;
+            return (Single)(remaining.TotalMilliseconds / (Period * 1000));
+        }
+
+        public Single SecondsIntervalElapsed()
+        {
+            TimeSpan elapsed = DateTime.Now - lastTimeCodeBegins;
+            return (Single)elapsed.TotalSeconds;
+        }
+
+        public Single SecondsIntervalRemaining()
+        {
+            TimeSpan remaining = lastTimeCodeEnds - DateTime.Now;
+            return (Single)remaining.TotalSeconds;
+        }
+        #endregion
     }
 }

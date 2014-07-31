@@ -116,7 +116,7 @@
     <Compile Include="DeprecatedCode\Persistence.cs" />
     <Compile Include="PBKDF2.cs" />
     <Compile Include="TOTPAccount.cs" />
-    <Compile Include="Base32Encoder.cs" />
+    <Compile Include="DeprecatedCode\Base32Encoder.cs" />
     <Compile Include="Forms\frmTOTPAccount.cs">
       <SubType>Form</SubType>
     </Compile>

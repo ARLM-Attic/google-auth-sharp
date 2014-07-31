@@ -44,9 +44,9 @@ namespace GoogleAuthClone
             {
                 if (lbAccounts.SelectedIndex != -1)
                 {
-                    txtCode.Text = accounts[lbAccounts.SelectedItem as string].ComputePIN(DateTime.Now);
+                    txtCode.Text = accounts[lbAccounts.SelectedItem as string].ComputePIN();//DateTime.Now);
 
-                    Single percent = accounts[lbAccounts.SelectedItem as string].PercentIntervalElapsed(DateTime.Now);
+                    Single percent = accounts[lbAccounts.SelectedItem as string].PercentIntervalElapsed();//DateTime.Now);
                     if (percent > 0.65 && percent < 0.8)
                         pbTimeOut.BackColor = Color.Yellow;
                     else if (percent >= 0.8)
@@ -57,19 +57,27 @@ namespace GoogleAuthClone
                     lblTimeOut.Text = "TIMEOUT IN\r\n";
                     try
                     {
-                        lblTimeOut.Text +=
-                            float.Parse(
-                            ((1 - percent) * accounts[lbAccounts.SelectedItem.ToString()].Period)
-                            .ToString()).ToString("0") + " SECONDS";
+                        lblTimeOut.Text += 
+                            accounts[lbAccounts.SelectedItem as string].SecondsIntervalRemaining().ToString("0")
+                            + " SECONDS";
+                            //float.Parse(
+                            //((1 - percent) * accounts[lbAccounts.SelectedItem.ToString()].Period)
+                            //.ToString()).ToString("0") + " SECONDS";
                     }
                     catch { }
+                    if (accounts[lbAccounts.SelectedItem as string].SecondsIntervalRemaining() < 1 ||
+                        accounts[lbAccounts.SelectedItem as string].SecondsIntervalElapsed() < 1)
+                    {
+                        txtCode.SelectionStart = 0;
+                        txtCode.SelectionLength = 0;
+                    }
                 }
                 else
                 {
                     txtCode.Text = "==========";
                     lblTimeOut.Text = "No Code Selected";
                     pbTimeOut.Width = (int)(timeOutFullWidth);
-                    pbTimeOut.BackColor = Color.Blue;
+                    pbTimeOut.BackColor = Color.Black;
                 }
                 tmrGetCodes.Enabled = true;
             }
@@ -95,6 +103,8 @@ namespace GoogleAuthClone
                 this.TopMost = mySettings.AlwaysOnTop;
                 menuWindowAlwaysOnTop.Checked = mySettings.AlwaysOnTop;
             }
+            
+            Application.DoEvents(); // this speeds up the window placement before everything else is loaded.
 
             Exception readProblem = null;
             bool foundStuff = false;
@@ -802,6 +812,11 @@ namespace GoogleAuthClone
         {
             SaveSettings();
             MessageBox.Show("Done");
+        }
+
+        private void lbAccounts_DoubleClick(object sender, EventArgs e)
+        {
+            EditAccount();
         }
 
         //*/

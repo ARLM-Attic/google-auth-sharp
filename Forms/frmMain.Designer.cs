@@ -67,7 +67,7 @@
             // 
             // tmrGetCodes
             // 
-            this.tmrGetCodes.Interval = 2000;
+            this.tmrGetCodes.Interval = 250;
             this.tmrGetCodes.Tick += new System.EventHandler(this.tmrGetCodes_Tick);
             // 
             // lbAccounts
@@ -81,6 +81,7 @@
             this.lbAccounts.Size = new System.Drawing.Size(361, 116);
             this.lbAccounts.TabIndex = 1;
             this.lbAccounts.SelectedIndexChanged += new System.EventHandler(this.lbAccounts_SelectedIndexChanged);
+            this.lbAccounts.DoubleClick += new System.EventHandler(this.lbAccounts_DoubleClick);
             // 
             // lblGetCode
             // 
@@ -97,8 +98,7 @@
             // 
             // pbTimeOut
             // 
-            this.pbTimeOut.BackColor = System.Drawing.Color.Blue;
-            this.pbTimeOut.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pbTimeOut.BackColor = System.Drawing.Color.Black;
             this.pbTimeOut.Location = new System.Drawing.Point(285, 190);
             this.pbTimeOut.Name = "pbTimeOut";
             this.pbTimeOut.Size = new System.Drawing.Size(88, 17);
