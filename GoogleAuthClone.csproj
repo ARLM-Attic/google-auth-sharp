@@ -89,8 +89,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Base32EncoderAlt.cs" />
-    <Compile Include="DeprecatedCode\AccountPassPhrase10.cs" />
-    <Compile Include="DeprecatedCode\AccountXMLPersistance10.cs" />
     <Compile Include="AccountPassPhrase11.cs" />
     <Compile Include="AccountXMLPersistance11.cs" />
     <Compile Include="ApplicationSettings.cs" />
@@ -112,11 +110,8 @@
     <Compile Include="Forms\frmGetBarcode.Designer.cs">
       <DependentUpon>frmGetBarcode.cs</DependentUpon>
     </Compile>
-    <Compile Include="DeprecatedCode\PassPhrase.cs" />
-    <Compile Include="DeprecatedCode\Persistence.cs" />
     <Compile Include="PBKDF2.cs" />
     <Compile Include="TOTPAccount.cs" />
-    <Compile Include="DeprecatedCode\Base32Encoder.cs" />
     <Compile Include="Forms\frmTOTPAccount.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -128,12 +123,6 @@
     </Compile>
     <Compile Include="Forms\frmMain.Designer.cs">
       <DependentUpon>frmMain.cs</DependentUpon>
-    </Compile>
-    <Compile Include="DeprecatedCode\frmPassPhrase.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="DeprecatedCode\frmPassPhrase.Designer.cs">
-      <DependentUpon>frmPassPhrase.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -152,9 +141,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\frmMain.resx">
       <DependentUpon>frmMain.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DeprecatedCode\frmPassPhrase.resx">
-      <DependentUpon>frmPassPhrase.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -180,7 +166,9 @@
     <Content Include="ZXing\zxing.pdb" />
     <Content Include="ZXing\zxing.XML" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="DeprecatedCode\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

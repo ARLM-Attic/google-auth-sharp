@@ -2,6 +2,7 @@
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
+using System.Collections.Generic;
 using SSC = System.Security.Cryptography;
 
 namespace GoogleAuthClone
@@ -326,9 +327,39 @@ namespace GoogleAuthClone
 
         //ACTUAL CALCULATION METHODS
 
+        internal static string _computePin(UInt64 timeCode, byte[] secret, TOTPAlgorithm algorithm, int period, byte digits)
+        {
+            SSC.HMAC myAlg = null;
+            switch (algorithm)
+            {
+                case TOTPAlgorithm.SHA1: myAlg = new SSC.HMACSHA1(secret); break;
+                case TOTPAlgorithm.SHA256: myAlg = new SSC.HMACSHA256(secret); break;
+                case TOTPAlgorithm.SHA512: myAlg = new SSC.HMACSHA512(secret); break;
+                case TOTPAlgorithm.MD5: myAlg = new SSC.HMACMD5(secret); break;
+            }
+            byte[] theIntervalsBytes = BitConverter.GetBytes(timeCode);
+            Array.Reverse(theIntervalsBytes);
+            byte[] hashResult = myAlg.ComputeHash(theIntervalsBytes);
+            myAlg.Clear();
+            return ExtractDTB(hashResult, digits);
+        }
+
+
         public string ComputePIN()
         {
-            return ComputePIN(DateTime.Now);
+            //updated to cache the last code to ease updating displays
+            //load should spike when new time code is used, else should be low while using cached code
+            UInt64 theInterval = GetTimeCode(DateTime.Now, Period);
+            if (theInterval == lastTimeCodeCalculated && !string.IsNullOrWhiteSpace(lastCodeCalculated))
+                return lastCodeCalculated;
+            else
+            {
+                lastTimeCodeCalculated = theInterval;
+                lastTimeCodeBegins = GetDateFromTimeCode(lastTimeCodeCalculated, Period);
+                lastTimeCodeEnds = GetDateFromTimeCode(lastTimeCodeCalculated, Period).AddSeconds(Period);
+                lastCodeCalculated = _computePin(theInterval, GetSecret(), Algorithm, Period, Digits);
+                return lastCodeCalculated;
+            }
         }
 
         /// <summary>
@@ -338,32 +369,41 @@ namespace GoogleAuthClone
         /// <returns></returns>
         public string ComputePIN(DateTime when)
         {
-            //updated to cache the last code to ease updating displays
-            //load should spike when new time code is used, else should be low while using cached code
-            UInt64 theInterval = GetTimeCode(when, Period);
-            if (theInterval == lastTimeCodeCalculated && !string.IsNullOrWhiteSpace(lastCodeCalculated))
-                return lastCodeCalculated;
-            else
-            {
-                lastTimeCodeCalculated = theInterval;
-                lastTimeCodeBegins = GetDateFromTimeCode(lastTimeCodeCalculated, Period);
-                lastTimeCodeEnds = GetDateFromTimeCode(lastTimeCodeCalculated, Period).AddSeconds(Period);
-                SSC.HMAC myAlg = null;
-                switch (Algorithm)
-                {
-                    case TOTPAlgorithm.SHA1: myAlg = new SSC.HMACSHA1(this.GetSecret()); break;
-                    case TOTPAlgorithm.SHA256: myAlg = new SSC.HMACSHA256(this.GetSecret()); break;
-                    case TOTPAlgorithm.SHA512: myAlg = new SSC.HMACSHA512(this.GetSecret()); break;
-                    case TOTPAlgorithm.MD5: myAlg = new SSC.HMACMD5(this.GetSecret()); break;
-                }
-                byte[] theIntervalsBytes = BitConverter.GetBytes(theInterval);
-                Array.Reverse(theIntervalsBytes);
-                byte[] hashResult = myAlg.ComputeHash(theIntervalsBytes);
-                myAlg.Clear();
-                lastCodeCalculated = ExtractDTB(hashResult, Digits); //cache it
-                return lastCodeCalculated;
-            }
+            //don't cache a special request
+            return _computePin(GetTimeCode(when, Period), GetSecret(), Algorithm, Period, Digits);    
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="plusMinusCount">The number of time intervals before and after the specified time to return codes.
+        /// (Used by servers/verifiers to allow for clock skew)</param>
+        /// <returns></returns>
+        public string[] ComputePins(int plusMinusCount)
+        {
+            return ComputePins(DateTime.Now, plusMinusCount);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="when"></param>
+        /// <param name="plusMinusCount">The number of time intervals before and after the specified time to return codes.
+        /// (Used by servers/verifiers to allow for clock skew)</param>
+        /// <returns></returns>
+        public string[] ComputePins(DateTime when, int plusMinusCount)
+        {
+            if (plusMinusCount < 1 || plusMinusCount > 10)
+                throw new ArgumentOutOfRangeException("plusMinusCount", "Plus Minus Count must be between 1 and 10 (inclusive).");
+            List<string> result = new List<string>(1 + (2 * plusMinusCount));
+            UInt64 startingTimeCode = (UInt64)(GetTimeCode(when, this.Period) - (UInt64)plusMinusCount);
+            for (int i = 0; i < (1 + (2 * plusMinusCount)); i++)
+            {
+                result.Add(_computePin(startingTimeCode + (UInt64)i, this.GetSecret(), Algorithm, Period, Digits));
+            }
+            return result.ToArray();
+        }
+
 
         /// <summary>
         /// Take a source byte array and extract an X digit code from a variable (but deterministic) location within the array.
@@ -410,25 +450,37 @@ namespace GoogleAuthClone
         public Single PercentIntervalElapsed()//(DateTime theDateTime)
         {
             TimeSpan elapsed = DateTime.Now - lastTimeCodeBegins;
-            return (Single)(elapsed.TotalMilliseconds / (Period * 1000));
+            if (elapsed.TotalSeconds > Period)
+                return 1F;
+            else
+                return (Single)(elapsed.TotalMilliseconds / (Period * 1000));
         }
         
         public Single PercentIntervalRemaining()//(DateTime theDateTime)
         {
             TimeSpan remaining = lastTimeCodeEnds - DateTime.Now;
-            return (Single)(remaining.TotalMilliseconds / (Period * 1000));
+            if (remaining.TotalSeconds < 0)
+                return 0F;
+            else
+                return (Single)(remaining.TotalMilliseconds / (Period * 1000));
         }
 
         public Single SecondsIntervalElapsed()
         {
             TimeSpan elapsed = DateTime.Now - lastTimeCodeBegins;
-            return (Single)elapsed.TotalSeconds;
+            if (elapsed.TotalSeconds > Period)
+                return Period;
+            else
+                return (Single)elapsed.TotalSeconds;
         }
 
         public Single SecondsIntervalRemaining()
         {
             TimeSpan remaining = lastTimeCodeEnds - DateTime.Now;
-            return (Single)remaining.TotalSeconds;
+            if (remaining.TotalSeconds < 0)
+                return 0F;
+            else
+                return (Single)remaining.TotalSeconds;
         }
         #endregion
     }

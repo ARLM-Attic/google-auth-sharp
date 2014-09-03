@@ -87,9 +87,9 @@ namespace GoogleAuthClone
         // NEW WAY
         private void frmMain_Shown(object sender, EventArgs e)
         {
-            allowDirtyUpdates = true;
             if (userPP.Initialized)
                 return; // this is because we've ALREADY gotten the user passphrase
+            allowDirtyUpdates = true; // only set to true the FIRST TIME! #BUG FIX!
             string theAssembly = Assembly.GetAssembly(typeof(AccountXMLPersistance11)).CodeBase;
             string thePath = Path.GetFullPath(
                     theAssembly.Replace("file:///", "")).Replace(
@@ -199,13 +199,6 @@ namespace GoogleAuthClone
             allowDirtyUpdates = false;
         }
 
-
-        // OLD WAY
-        //private void frmMain_Shown(object sender, EventArgs e)
-        //{   //get old code from CodePlex change sets September 2012 and older
-        // removed for brevity
-        //}
-
         private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
         {
             mySettings.AlwaysOnTop = this.TopMost;
@@ -310,14 +303,14 @@ namespace GoogleAuthClone
             this.Enabled = true;
         }
 
-        private void AddAccount()
+        private void AddAccount(TOTPAccount imported = null)
         {
             frmTOTPAccount newAcc = null;
             try
             {
                 this.Enabled = false;
                 tmrGetCodes.Enabled = false;
-                newAcc = new frmTOTPAccount(null);
+                newAcc = new frmTOTPAccount(imported);
                 DialogResult ret = newAcc.ShowDialog(this);
                 if (ret == DialogResult.OK)
                 {
@@ -332,7 +325,7 @@ namespace GoogleAuthClone
                     accounts.Add(theNewAcc.Name, theNewAcc);
                     int newItem = lbAccounts.Items.Add(theNewAcc.Name);
                     lbAccounts.ClearSelected();
-                    if (!allowDirtyUpdates)
+                    if (!allowDirtyUpdates || imported != null)
                         accountsDirty = true;
                 }
             }
@@ -452,105 +445,6 @@ namespace GoogleAuthClone
                     accounts[lbAccounts.SelectedItem as string].EncodedSecret);
                 theBarcodeForm.ShowDialog(this);
             }
-        }
-
-        private void menuFileImportLegacy_Click(object sender, EventArgs e)
-        {
-            //MessageBox.Show("OOPS!  I haven't actually coded that part up yet!  Sorry :(");
-            //return;
-            bool foundLegacyStuff;
-            Exception readProblem = null;
-            if (!AccountXMLPersistance11.CheckForLegacyAccounts(out foundLegacyStuff, out readProblem) && readProblem == null)
-            {
-                MessageBox.Show("Sorry, there doesn't appear to be a legacy Accounts.dat file in the program directory.");
-                return;
-            }
-            else if (!foundLegacyStuff && readProblem == null)
-            {
-                MessageBox.Show("Sorry, there doesn't appear to be a (valid) legacy Accounts.dat file in the program directory.");
-                return;
-            }
-            else if (readProblem != null)
-            {
-                MessageBox.Show("Sorry, something went wrong looking for a legacy Accounts.dat file in the program directory.\r\n" +
-                    readProblem.Message);
-                return;
-            }
-            
-            Dictionary<string, TOTPAccount> tempAccounts = new Dictionary<string, TOTPAccount>();
-            DialogResult ret = System.Windows.Forms.DialogResult.Ignore;
-            GoogleAuthClone.Deprecated.PassPhrase old_ppStore =
-                new GoogleAuthClone.Deprecated.PassPhrase();  // THIS IS USED FOR LEGACY DATA ONLY!
-            MessageBox.Show("Ok, on the next pop-up screen, enter the OLD passphrase that was used to store the Legacy Data," +
-                    " and that data will be converted to the new version.",
-                    "About to Import Legacy Data", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            if (!old_ppStore.GetFromUser(this))
-            {
-                return;
-            }
-            string blob = GoogleAuthClone.Deprecated.Persistence.GetAccountBlob(out readProblem); // THIS IS USED FOR LEGACY DATA ONLY
-            ret = System.Windows.Forms.DialogResult.Retry;
-            string buffer = old_ppStore.RemoveFromString(blob);
-            while (!buffer.Contains("?secret="))
-            {
-                ret = MessageBox.Show(this, "Sorry, but that passphrase doesn't work, please try again?",
-                    "Incorrect passphrase, try again", MessageBoxButtons.RetryCancel, MessageBoxIcon.Exclamation);
-                if (ret == DialogResult.Retry)
-                {
-                    old_ppStore.Clear();
-                    if (!old_ppStore.GetFromUser(this))
-                    {
-                        return;
-                    }
-                    else
-                    {
-                        buffer = old_ppStore.RemoveFromString(blob);
-                    }
-                }
-                else
-                {
-                    return;
-                }
-            }
-            // lastly, rehydrate from stored material
-            string[] things = buffer.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
-            foreach (string thing in things)
-            {
-                TOTPAccount acc = TOTPAccount.FromUriString(thing);
-                if (acc != null)
-                {
-                    acc.Name += "[LEGACY]";
-                    tempAccounts.Add(acc.Name, acc);
-                    //lbAccounts.Items.Add(acc.Name);
-                }
-            }
-            ret = MessageBox.Show(this, "A total of " + tempAccounts.Count + " accounts were found, continue to import? (Imported accounts will be named with [LEGACY]" +
-                " for easy identification later. Deletion of duplicates is up to you!)", "FOUND SOME LEGACY ACCOUNTS", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-            if (ret == DialogResult.Yes)
-            {
-                List<string> duplicates = new List<string>();
-                foreach (string a in tempAccounts.Keys)
-                {
-                    if (accounts.ContainsKey(a))
-                        duplicates.Add(a);
-                    else
-                    {
-                        accounts.Add(a, tempAccounts[a]);
-                        lbAccounts.Items.Add(a);
-                        accountsDirty = true;
-                    }
-                }
-                if (duplicates.Count > 0)
-                {
-                    string duplicateList = "";
-                    foreach (string d in duplicates)
-                        duplicateList += d + "\r\n";
-                    MessageBox.Show("Oops, despite adding the [LEGACY] tag to the title, one or more accounts was/were found that already existed. \r\n" + 
-                        "Did you already import this file, perhaps?\r\n\r\n" + duplicateList);
-                }
-                duplicates.Clear();
-            }
-            tempAccounts.Clear();
         }
 
         private void menuFileAdd_Click(object sender, EventArgs e)
@@ -819,6 +713,18 @@ namespace GoogleAuthClone
             EditAccount();
         }
 
+        private void menuFileImportBarcode_Click(object sender, EventArgs e)
+        {
+            frmGetBarcode myBarCode = new frmGetBarcode();
+            myBarCode.Tag = null;
+            DialogResult ret = myBarCode.ShowDialog(this);
+            if (ret == System.Windows.Forms.DialogResult.OK && myBarCode.Tag != null)
+            {
+                TOTPAccount theAccount = myBarCode.Tag as TOTPAccount;
+                myBarCode.Dispose();
+                AddAccount(theAccount);
+            }
+        }
         //*/
     }
 }

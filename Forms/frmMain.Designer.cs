@@ -50,7 +50,6 @@
             this.menuFileExportEncrypted = new System.Windows.Forms.ToolStripMenuItem();
             this.menuFileExportPlain = new System.Windows.Forms.ToolStripMenuItem();
             this.menuFileImport = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuFileImportLegacy = new System.Windows.Forms.ToolStripMenuItem();
             this.menuFileImportXML = new System.Windows.Forms.ToolStripMenuItem();
             this.menuSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.menuFileQuit = new System.Windows.Forms.ToolStripMenuItem();
@@ -61,6 +60,7 @@
             this.menuWindowAlwaysOnTop = new System.Windows.Forms.ToolStripMenuItem();
             this.dlgSaveBackup = new System.Windows.Forms.SaveFileDialog();
             this.dlgLoadXML = new System.Windows.Forms.OpenFileDialog();
+            this.menuFileImportBarcode = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.pbTimeOut)).BeginInit();
             this.menuMain.SuspendLayout();
             this.SuspendLayout();
@@ -251,23 +251,16 @@
             // menuFileImport
             // 
             this.menuFileImport.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.menuFileImportLegacy,
-            this.menuFileImportXML});
+            this.menuFileImportXML,
+            this.menuFileImportBarcode});
             this.menuFileImport.Name = "menuFileImport";
             this.menuFileImport.Size = new System.Drawing.Size(285, 22);
             this.menuFileImport.Text = "Import Accounts";
             // 
-            // menuFileImportLegacy
-            // 
-            this.menuFileImportLegacy.Name = "menuFileImportLegacy";
-            this.menuFileImportLegacy.Size = new System.Drawing.Size(323, 22);
-            this.menuFileImportLegacy.Text = "From Accounts.dat file (Sept 2012 -> Aug 2013)";
-            this.menuFileImportLegacy.Click += new System.EventHandler(this.menuFileImportLegacy_Click);
-            // 
             // menuFileImportXML
             // 
             this.menuFileImportXML.Name = "menuFileImportXML";
-            this.menuFileImportXML.Size = new System.Drawing.Size(323, 22);
+            this.menuFileImportXML.Size = new System.Drawing.Size(293, 22);
             this.menuFileImportXML.Text = "From previously exported XML file";
             this.menuFileImportXML.Click += new System.EventHandler(this.menuFileImportXML_Click);
             // 
@@ -344,6 +337,13 @@
             this.dlgLoadXML.RestoreDirectory = true;
             this.dlgLoadXML.Title = "Import Accounts";
             // 
+            // menuFileImportBarcode
+            // 
+            this.menuFileImportBarcode.Name = "menuFileImportBarcode";
+            this.menuFileImportBarcode.Size = new System.Drawing.Size(293, 22);
+            this.menuFileImportBarcode.Text = "From Barcode Image File (single account)";
+            this.menuFileImportBarcode.Click += new System.EventHandler(this.menuFileImportBarcode_Click);
+            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -403,13 +403,13 @@
         private System.Windows.Forms.ToolStripMenuItem menuFileExport;
         private System.Windows.Forms.SaveFileDialog dlgSaveBackup;
         private System.Windows.Forms.ToolStripMenuItem menuFileImport;
-        private System.Windows.Forms.ToolStripMenuItem menuFileImportLegacy;
         private System.Windows.Forms.ToolStripMenuItem menuFileImportXML;
         private System.Windows.Forms.ToolStripSeparator menuSeparator3;
         private System.Windows.Forms.ToolStripMenuItem menuFileExportEncrypted;
         private System.Windows.Forms.ToolStripMenuItem menuFileExportPlain;
         private System.Windows.Forms.OpenFileDialog dlgLoadXML;
         private System.Windows.Forms.ToolStripMenuItem menuFileSave;
+        private System.Windows.Forms.ToolStripMenuItem menuFileImportBarcode;
     }
 }
 
